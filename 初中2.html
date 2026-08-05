@@ -1,0 +1,3448 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GAIT-Junior 初中标准筛查版</title>
+
+  <!-- jsPsych 7.3.4 及所需插件。首次运行需要联网加载这些 CDN 文件。 -->
+  <script src="https://unpkg.com/jspsych@7.3.4/dist/index.browser.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/jspsych@7.3.4/css/jspsych.css">
+  <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.3/dist/index.browser.js"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.3/dist/index.browser.js"></script>
+  <script src="https://unpkg.com/@jspsych/plugin-survey-text@1.1.3/dist/index.browser.js"></script>
+
+  <style>
+    :root {
+      --ink: #14213d;
+      --muted: #5f6b7a;
+      --blue: #1f5fbf;
+      --blue-dark: #17478f;
+      --blue-pale: #eef5ff;
+      --cyan: #0e8a92;
+      --green: #18864b;
+      --red: #c43b3b;
+      --orange: #ef8c2f;
+      --line: #d7dfeb;
+      --paper: #ffffff;
+      --bg: #f3f6fb;
+      --shadow: 0 18px 50px rgba(31, 61, 107, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      min-height: 100%;
+      margin: 0;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(64, 147, 255, 0.12), transparent 32rem),
+        radial-gradient(circle at 100% 100%, rgba(14, 138, 146, 0.10), transparent 30rem),
+        var(--bg);
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif;
+    }
+
+    body { font-size: 17px; line-height: 1.65; }
+
+    #jspsych-target {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px 18px;
+    }
+
+    #jspsych-content {
+      width: min(960px, 100%);
+      max-width: 960px;
+    }
+
+    .gait-card {
+      width: 100%;
+      padding: clamp(24px, 4vw, 44px);
+      border: 1px solid rgba(215, 223, 235, 0.95);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.97);
+      box-shadow: var(--shadow);
+      text-align: left;
+    }
+
+    .gait-card.compact { max-width: 760px; margin: 0 auto; }
+    .gait-card.center { text-align: center; }
+
+    h1, h2, h3 { line-height: 1.3; margin-top: 0; color: var(--ink); }
+    h1 { font-size: clamp(28px, 4.2vw, 42px); margin-bottom: 12px; }
+    h2 { font-size: clamp(24px, 3.4vw, 32px); margin-bottom: 16px; }
+    h3 { font-size: 20px; margin-bottom: 10px; }
+    p { margin: 10px 0; }
+
+    .subtitle { color: var(--muted); font-size: 18px; margin-bottom: 24px; }
+
+    .module-pill, .mode-pill, .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 6px 13px;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.02em;
+    }
+
+    .module-pill { color: var(--blue); background: var(--blue-pale); margin-bottom: 14px; }
+    .mode-pill { color: #7b4c00; background: #fff2cf; }
+    .status-pill { color: var(--green); background: #e8f7ef; }
+
+    .info-box, .warning-box, .ai-box, .material-box {
+      margin: 18px 0;
+      padding: 16px 18px;
+      border-radius: 14px;
+      text-align: left;
+    }
+
+    .info-box { border-left: 5px solid var(--blue); background: var(--blue-pale); }
+    .warning-box { border-left: 5px solid #d08a00; background: #fff7df; }
+    .ai-box { border: 1px solid #9cc6d9; background: #edf9fb; }
+    .material-box { border: 1px solid var(--line); background: #f9fbfe; }
+
+    .instruction-panel {
+      margin: 22px 0 16px;
+      padding: 22px;
+      border: 1px solid #bcd0ed;
+      border-radius: 16px;
+      background: #f6faff;
+    }
+
+    .instruction-panel > h3 { margin-bottom: 16px; color: var(--blue-dark); }
+    .rule-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .rule-item {
+      min-height: 112px;
+      padding: 15px 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .rule-item h3 { margin: 0 0 7px; color: var(--ink); font-size: 17px; }
+    .rule-item p { margin: 5px 0; }
+    .example-box {
+      margin-top: 12px;
+      padding: 13px 15px;
+      border-left: 4px solid var(--cyan);
+      border-radius: 9px;
+      background: #edf9fb;
+    }
+
+    .key-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 38px;
+      margin: 0 4px;
+      padding: 2px 10px;
+      border: 1px solid #9fb1ca;
+      border-bottom-width: 3px;
+      border-radius: 7px;
+      background: #fff;
+      color: var(--ink);
+      font-weight: 850;
+    }
+
+    .module-progress {
+      height: 8px;
+      margin: 0 0 20px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e4eaf3;
+    }
+
+    .module-progress > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--blue), var(--cyan));
+    }
+
+    .sequence-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 11px;
+      margin: 20px 0;
+    }
+
+    .sequence-item {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .sequence-number {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--blue-pale);
+      color: var(--blue);
+      font-weight: 850;
+    }
+
+    .sequence-item strong { display: block; line-height: 1.35; }
+    .sequence-item span:last-child { color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+    .muted { color: var(--muted); }
+    .small { font-size: 14px; }
+    .strong { font-weight: 800; }
+    .no-select { user-select: none; }
+
+    .gait-btn, .jspsych-btn {
+      appearance: none;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 22px;
+      background: var(--blue);
+      color: #fff;
+      font: inherit;
+      font-weight: 750;
+      cursor: pointer;
+      box-shadow: 0 7px 18px rgba(31, 95, 191, 0.22);
+      transition: transform 120ms ease, background 120ms ease, opacity 120ms ease;
+      margin: 8px 6px 0 0;
+    }
+
+    .gait-btn:hover, .jspsych-btn:hover { background: var(--blue-dark); transform: translateY(-1px); }
+    .gait-btn:focus-visible, .jspsych-btn:focus-visible,
+    input:focus-visible, textarea:focus-visible, select:focus-visible {
+      outline: 3px solid rgba(31, 95, 191, 0.28);
+      outline-offset: 2px;
+    }
+
+    .gait-btn.secondary { color: var(--blue); background: #edf3fc; box-shadow: none; }
+    .gait-btn.danger { background: var(--red); }
+    .gait-btn:disabled { cursor: not-allowed; opacity: 0.45; transform: none; }
+
+    .button-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
+    .button-row.center { justify-content: center; }
+
+    label.field-label { display: block; margin: 16px 0 6px; font-weight: 750; }
+    input[type="text"], input[type="number"], textarea, select {
+      width: 100%;
+      border: 1px solid #bfcadd;
+      border-radius: 11px;
+      background: #fff;
+      padding: 11px 13px;
+      color: var(--ink);
+      font: inherit;
+    }
+
+    textarea { min-height: 112px; resize: vertical; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px 18px;
+    }
+
+    .check-row, .choice-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 11px 0;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .choice-row { cursor: pointer; }
+    .choice-row:hover { border-color: #91acd6; background: #f7faff; }
+    input[type="checkbox"], input[type="radio"] { width: 19px; height: 19px; margin-top: 4px; flex: 0 0 auto; }
+
+    .timer {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 86px;
+      border-radius: 999px;
+      padding: 6px 12px;
+      background: #eef2f8;
+      color: #33445f;
+      font-variant-numeric: tabular-nums;
+      font-weight: 800;
+    }
+
+    .timer.urgent { background: #ffe9e9; color: #a52b2b; }
+
+    .trial-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .entry-row {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      align-items: start;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .entry-number {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--blue);
+      background: var(--blue-pale);
+      font-weight: 800;
+    }
+
+    .rat-cues {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin: 24px 0;
+    }
+
+    .rat-cue {
+      display: grid;
+      place-items: center;
+      min-height: 88px;
+      border: 2px solid #bdd0ea;
+      border-radius: 16px;
+      background: #f7fbff;
+      font-size: 34px;
+      font-weight: 850;
+    }
+
+    .rt-shell { text-align: center; }
+    .rt-map { color: var(--muted); margin-bottom: 22px; font-weight: 700; }
+    .fixation { font-size: 56px; font-weight: 400; line-height: 1; }
+    .arrow-stimulus { font-size: 96px; line-height: 1.15; font-weight: 900; }
+    .stop-cue {
+      height: 48px;
+      color: transparent;
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+    }
+    .stop-cue.active { color: var(--red); }
+    .stop-ai-distractor {
+      min-height: 36px;
+      margin: 0 auto 8px;
+      padding: 5px 12px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: transparent;
+      font-size: 14px;
+      font-weight: 750;
+    }
+    .stop-ai-distractor.active {
+      border-color: #9cc6d9;
+      background: #edf9fb;
+      color: #176675;
+    }
+
+    .nback-stimulus {
+      min-height: 180px;
+      display: grid;
+      place-items: center;
+      font-size: 96px;
+      font-weight: 850;
+    }
+
+    .switch-cue { min-height: 42px; color: var(--blue); font-size: 25px; font-weight: 850; }
+    .switch-shape-wrap { min-height: 170px; display: grid; place-items: center; }
+    .shape-circle { width: 96px; height: 96px; border-radius: 50%; }
+    .shape-triangle { width: 0; height: 0; border-left: 56px solid transparent; border-right: 56px solid transparent; }
+    .shape-triangle.orange { border-bottom: 98px solid var(--orange); }
+    .shape-triangle.blue { border-bottom: 98px solid #2676d9; }
+    .shape-circle.orange { background: var(--orange); }
+    .shape-circle.blue { background: #2676d9; }
+
+    .confidence-wrap { margin: 18px 0; }
+    input[type="range"] { width: 100%; accent-color: var(--blue); }
+    .range-labels { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; }
+
+    .error-text { min-height: 26px; color: var(--red); font-weight: 700; margin-top: 8px; }
+    .success-text { color: var(--green); font-weight: 800; }
+
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .download-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      background: #fbfcff;
+    }
+
+    @media (max-width: 680px) {
+      body { font-size: 16px; }
+      #jspsych-target { padding: 12px 8px; }
+      .gait-card { border-radius: 15px; padding: 22px 17px; }
+      .form-grid, .download-grid, .rule-grid, .sequence-grid { grid-template-columns: 1fr; }
+      .rat-cue { font-size: 28px; min-height: 70px; }
+      .arrow-stimulus, .nback-stimulus { font-size: 76px; }
+    }
+  </style>
+</head>
+<body>
+  <noscript>
+    <div style="max-width:720px;margin:40px auto;padding:24px;background:#fff;border:1px solid #ddd;">
+      本实验需要启用 JavaScript。请在浏览器设置中启用后重新打开。
+    </div>
+  </noscript>
+  <div id="jspsych-target"></div>
+
+  <script>
+  "use strict";
+
+  if (
+    typeof initJsPsych !== "function" ||
+    typeof jsPsychHtmlKeyboardResponse === "undefined" ||
+    typeof jsPsychHtmlButtonResponse === "undefined"
+  ) {
+    document.getElementById("jspsych-target").innerHTML = `
+      <section class="gait-card compact">
+        <h2>实验组件加载失败</h2>
+        <div class="warning-box">
+          请确认电脑已联网，并允许访问 unpkg.com，然后刷新页面。若学校网络屏蔽 CDN，请使用离线部署版。
+        </div>
+      </section>
+    `;
+    throw new Error("jsPsych 或必要插件未成功加载");
+  }
+
+  /* ================================================================
+     GAIT-Junior 初中标准筛查版 v1.5.0-pilot
+     - 默认：完整预测试版本（预计 40-50 分钟）
+     - 快速演示：在文件网址末尾添加 ?demo=1
+     - 所有 AI 内容均为固定材料，不调用实时 AI
+     ================================================================ */
+
+  const EXPERIMENT = Object.freeze({
+    name: "GAIT-Junior 初中标准筛查版",
+    version: "1.5.0-pilot",
+    ageVersion: "middle_school_grade_7_9",
+    taskCount: 9
+  });
+
+  const query = new URLSearchParams(window.location.search);
+  const DEMO_MODE = query.get("demo") === "1";
+
+  /* 正式施测前，可只在这里调整时长和试次数。毫秒 = 秒数 x 1000。 */
+  const CONFIG = Object.freeze({
+    runMode: DEMO_MODE ? "demo" : "formal",
+    autPracticeMs: DEMO_MODE ? 10000 : 45000,
+    autFormalMs: DEMO_MODE ? 12000 : 150000,
+    problemPracticeMs: DEMO_MODE ? 10000 : 45000,
+    problemFormalMs: DEMO_MODE ? 12000 : 120000,
+    ratFormalItems: DEMO_MODE ? 3 : 12,
+    ratItemMs: DEMO_MODE ? 7000 : 20000,
+    stopPracticeTrials: DEMO_MODE ? 4 : 12,
+    stopBlocks: DEMO_MODE ? 1 : 3,
+    stopTrialsPerBlock: DEMO_MODE ? 8 : 40,
+    nbackPracticeTrials: DEMO_MODE ? 6 : 14,
+    nbackTwoBackPracticeTrials: DEMO_MODE ? 6 : 14,
+    nbackTrialsPerLevel: DEMO_MODE ? 10 : 48,
+    switchPureTrials: DEMO_MODE ? 6 : 16,
+    switchMixedTrials: DEMO_MODE ? 12 : 64,
+    aiAdviceItems: DEMO_MODE ? 2 : 8,
+    aiAdviceIndependentMs: DEMO_MODE ? 10000 : 35000,
+    aiAdviceReviewMs: DEMO_MODE ? 15000 : 50000,
+    creativePracticeStageMs: DEMO_MODE ? 7000 : 30000,
+    creativeFormalStageMs: DEMO_MODE ? 10000 : 90000,
+    jolItemsPerCondition: DEMO_MODE ? 2 : 6,
+    jolItemMs: DEMO_MODE ? 12000 : 35000,
+    breakMinMs: DEMO_MODE ? 2000 : 60000
+  });
+
+  const state = {
+    sessionId: makeId("S"),
+    participantId: "",
+    orderGroup: "",
+    startedAt: new Date().toISOString(),
+    startedPerformance: performance.now(),
+    started: false,
+    finished: false,
+    visibilityHiddenCount: 0,
+    visibilityLog: [],
+    currentModule: "",
+    stopSSD: 250,
+    pendingSummary: null,
+    summaryWritten: false,
+    checkpointAvailable: false
+  };
+
+  function makeId(prefix) {
+    const bytes = new Uint8Array(8);
+    if (window.crypto && window.crypto.getRandomValues) {
+      window.crypto.getRandomValues(bytes);
+    } else {
+      for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+    }
+    return prefix + "-" + Array.from(bytes, b => b.toString(16).padStart(2, "0")).join("");
+  }
+
+  function hashString(value) {
+    let hash = 2166136261;
+    for (let i = 0; i < value.length; i++) {
+      hash ^= value.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+  }
+
+  function escapeHTML(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function shuffle(items) {
+    const result = items.slice();
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+  }
+
+  function mean(values) {
+    const valid = values.filter(Number.isFinite);
+    return valid.length ? valid.reduce((a, b) => a + b, 0) / valid.length : null;
+  }
+
+  function median(values) {
+    const valid = values.filter(Number.isFinite).sort((a, b) => a - b);
+    if (!valid.length) return null;
+    const mid = Math.floor(valid.length / 2);
+    return valid.length % 2 ? valid[mid] : (valid[mid - 1] + valid[mid]) / 2;
+  }
+
+  function quantile(values, probability) {
+    const valid = values.filter(Number.isFinite).sort((a, b) => a - b);
+    if (!valid.length) return null;
+    const p = Math.min(1, Math.max(0, probability));
+    const index = (valid.length - 1) * p;
+    const lower = Math.floor(index);
+    const upper = Math.ceil(index);
+    if (lower === upper) return valid[lower];
+    return valid[lower] + (valid[upper] - valid[lower]) * (index - lower);
+  }
+
+  function round(value, digits = 3) {
+    return Number.isFinite(value) ? Number(value.toFixed(digits)) : null;
+  }
+
+  function formatTime(ms) {
+    const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    return minutes + ":" + seconds;
+  }
+
+  function normalizeShortAnswer(value) {
+    return String(value ?? "").trim().replace(/\s+/g, "").toLowerCase();
+  }
+
+  function baseData(taskName, phase, extra = {}) {
+    return {
+      taskName,
+      phase,
+      includeInPrimary: phase === "formal",
+      ...extra
+    };
+  }
+
+  const CHECKPOINT_KEY = "GAIT_JUNIOR_CHECKPOINT_V1";
+
+  function readCheckpoint() {
+    try {
+      const raw = window.sessionStorage.getItem(CHECKPOINT_KEY);
+      if (!raw) return null;
+      const checkpoint = JSON.parse(raw);
+      return checkpoint && Array.isArray(checkpoint.rows) ? checkpoint : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function persistCheckpoint() {
+    if (!state.started || state.finished) return;
+    try {
+      window.sessionStorage.setItem(CHECKPOINT_KEY, JSON.stringify({
+        experimentName: EXPERIMENT.name,
+        experimentVersion: EXPERIMENT.version,
+        participantId: state.participantId || null,
+        sessionId: state.sessionId,
+        savedAt: new Date().toISOString(),
+        rows: jsPsych.data.get().values()
+      }));
+      state.checkpointAvailable = true;
+    } catch (error) {
+      state.checkpointAvailable = false;
+    }
+  }
+
+  function clearCheckpoint() {
+    try {
+      window.sessionStorage.removeItem(CHECKPOINT_KEY);
+    } catch (error) {
+      // 某些 file:// 环境会禁用 sessionStorage；不影响实验继续运行。
+    }
+    state.checkpointAvailable = false;
+  }
+
+  const jsPsych = initJsPsych({
+    display_element: "jspsych-target",
+    show_progress_bar: false,
+    on_trial_start: function(trial) {
+      trial.data = trial.data || {};
+      trial.data.trialStartedAt = new Date().toISOString();
+      trial.data.moduleAtStart = state.currentModule || null;
+    },
+    on_trial_finish: function(data) {
+      data.trialEndedAt = new Date().toISOString();
+      data.visibilityHiddenCountSoFar = state.visibilityHiddenCount;
+      if (
+        data.taskName === "DEMOGRAPHICS" ||
+        data.taskName === "FATIGUE" ||
+        String(data.taskName || "").endsWith("_SUMMARY")
+      ) {
+        window.setTimeout(persistCheckpoint, 0);
+      }
+    },
+    on_finish: renderDownloadPage
+  });
+
+  jsPsych.data.addProperties({
+    experimentName: EXPERIMENT.name,
+    experimentVersion: EXPERIMENT.version,
+    ageVersion: EXPERIMENT.ageVersion,
+    runMode: CONFIG.runMode,
+    sessionId: state.sessionId,
+    sessionStartedAt: state.startedAt
+  });
+
+  document.addEventListener("visibilitychange", function() {
+    if (!state.started || document.visibilityState !== "hidden") return;
+    state.visibilityHiddenCount += 1;
+    const event = {
+      event: "visibility_hidden",
+      at: new Date().toISOString(),
+      performanceMs: round(performance.now() - state.startedPerformance, 1),
+      module: state.currentModule || null
+    };
+    state.visibilityLog.push(event);
+  });
+
+  window.addEventListener("beforeunload", function(event) {
+    if (!state.started || state.finished) return;
+    persistCheckpoint();
+    event.preventDefault();
+    event.returnValue = "";
+  });
+
+  function moduleIntro(moduleNumber, title, description, rules) {
+    return {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: function() {
+        state.currentModule = title;
+        return `
+          <section class="gait-card">
+            <div class="module-pill">模块 ${moduleNumber} / ${EXPERIMENT.taskCount}</div>
+            <div class="module-progress" aria-label="当前实验进度">
+              <span style="width:${round(moduleNumber / EXPERIMENT.taskCount * 100, 1)}%"></span>
+            </div>
+            <h2>${escapeHTML(title)}</h2>
+            <p class="subtitle">${escapeHTML(description)}</p>
+            <div class="instruction-panel">
+              <h3>请先读懂任务要求</h3>
+              ${rules}
+            </div>
+            <div class="info-box small">
+              <strong>实验流程：</strong>先完成带反馈的练习，确认理解后再进入正式任务。练习不计入正式结果；正式任务开始后不再提示对错。
+            </div>
+          </section>
+        `;
+      },
+      choices: ["我已读懂，开始练习"],
+      data: baseData("INSTRUCTION", "instruction", {
+        includeInPrimary: false,
+        moduleNumber,
+        moduleTitle: title
+      })
+    };
+  }
+
+  function simpleMessage(title, body, button = "继续", extraData = {}) {
+    return {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <section class="gait-card compact">
+          <h2>${escapeHTML(title)}</h2>
+          ${body}
+        </section>
+      `,
+      choices: [button],
+      data: baseData("INSTRUCTION", "instruction", {
+        includeInPrimary: false,
+        ...extraData
+      })
+    };
+  }
+
+  function fixationTrial(taskName, phase, duration = 350) {
+    return {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: '<div class="fixation no-select">+</div>',
+      choices: "NO_KEYS",
+      trial_duration: duration,
+      data: baseData(taskName + "_FIXATION", phase, { includeInPrimary: false })
+    };
+  }
+
+  function writeSummary(taskName, values) {
+    state.pendingSummary = {
+      ...baseData(taskName + "_SUMMARY", "formal"),
+      summaryFor: taskName,
+      ...values
+    };
+  }
+
+  function moduleComplete(title, summaryWriter) {
+    return {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <section class="gait-card compact center">
+          <div class="status-pill">本模块已完成</div>
+          <h2 style="margin-top:16px;">${escapeHTML(title)}</h2>
+          <p class="muted">请放松肩膀和眼睛，再进入下一部分。</p>
+        </section>
+      `,
+      choices: ["继续"],
+      on_start: function(trial) {
+        state.pendingSummary = null;
+        if (typeof summaryWriter === "function") summaryWriter();
+        if (state.pendingSummary) trial.data = { ...trial.data, ...state.pendingSummary };
+      },
+      data: baseData("MODULE_END", "instruction", {
+        includeInPrimary: false,
+        completedModule: title
+      })
+    };
+  }
+
+  function consentTrial() {
+    return {
+      type: jsPsychHtmlKeyboardResponse,
+      choices: "NO_KEYS",
+      stimulus: function() {
+        const checkpoint = readCheckpoint();
+        const recoveryHTML = checkpoint ? `
+          <div id="checkpoint-box" class="warning-box">
+            <strong>检测到本标签页中上一次未完成的实验数据。</strong>
+            <p class="small">保存时间：${escapeHTML(checkpoint.savedAt || "未知")}；被试编号：${escapeHTML(checkpoint.participantId || "尚未填写")}。</p>
+            <button id="checkpoint-download" class="gait-btn secondary" type="button">下载未完成数据 JSON</button>
+            <button id="checkpoint-clear" class="gait-btn danger" type="button">清除旧记录</button>
+          </div>
+        ` : "";
+        return `
+        <section class="gait-card">
+          <div class="module-pill">GAIT-Junior · 研究参与确认</div>
+          <h1>初中标准筛查版</h1>
+          <p class="subtitle">AI 时代拔尖创新潜质综合行为测验 · 预测试程序</p>
+          ${DEMO_MODE ? '<div class="warning-box"><span class="mode-pill">快速演示模式</span> 本次数据会标记为 demo，不能与正式样本混合。</div>' : ""}
+          ${recoveryHTML}
+          <div class="info-box">
+            <p><strong>任务内容：</strong>创意生成、远距联想、问题发现、反应时任务、AI 建议判断和信心判断。</p>
+            <p><strong>预计时长：</strong>${DEMO_MODE ? "约 5-8 分钟" : "约 40-50 分钟"}。中间设有休息。</p>
+            <p><strong>退出权利：</strong>参与完全自愿，可随时关闭页面退出，不影响任何学校评价。</p>
+            <p><strong>结果边界：</strong>结果仅作研究和发展性参考，不作为单一选拔、淘汰或贴标签依据。</p>
+          </div>
+          <div class="warning-box">
+            本页不能替代监护人书面知情同意。正式施测前，研究团队应已完成监护人书面同意和学生本人知情同意。
+          </div>
+          <label class="check-row">
+            <input id="guardian-consent" type="checkbox">
+            <span>我确认：研究团队已取得本人的监护人书面知情同意。</span>
+          </label>
+          <label class="check-row">
+            <input id="student-assent" type="checkbox">
+            <span>我已理解上面的说明，自愿参加，并知道可以随时退出。</span>
+          </label>
+          <div class="button-row">
+            <button id="consent-next" class="gait-btn" type="button" disabled>同意并继续</button>
+          </div>
+        </section>
+        `;
+      },
+      data: baseData("CONSENT", "consent", { includeInPrimary: false }),
+      on_load: function() {
+        const guardian = document.getElementById("guardian-consent");
+        const student = document.getElementById("student-assent");
+        const next = document.getElementById("consent-next");
+        const update = () => { next.disabled = !(guardian.checked && student.checked); };
+        guardian.addEventListener("change", update);
+        student.addEventListener("change", update);
+        const checkpoint = readCheckpoint();
+        const checkpointDownload = document.getElementById("checkpoint-download");
+        const checkpointClear = document.getElementById("checkpoint-clear");
+        if (checkpointDownload && checkpoint) {
+          checkpointDownload.addEventListener("click", function() {
+            const participant = safeFilenamePart(checkpoint.participantId || "partial");
+            downloadBlob(
+              JSON.stringify(checkpoint, null, 2),
+              "application/json;charset=utf-8",
+              "GAIT-Junior_" + participant + "_未完成数据.json"
+            );
+          });
+        }
+        if (checkpointClear) {
+          checkpointClear.addEventListener("click", function() {
+            clearCheckpoint();
+            const box = document.getElementById("checkpoint-box");
+            if (box) box.remove();
+          });
+        }
+        next.addEventListener("click", function() {
+          jsPsych.finishTrial({
+            guardianConsentConfirmed: guardian.checked,
+            studentAssent: student.checked
+          });
+        });
+      }
+    };
+  }
+
+  function deviceGateTrial() {
+    const userAgent = navigator.userAgent || "";
+    const mobileUserAgent = /Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(userAgent);
+    const iPadDesktopMode = /Macintosh/i.test(userAgent) && navigator.maxTouchPoints > 1;
+    const supported = !(mobileUserAgent || iPadDesktopMode);
+    return {
+      type: jsPsychHtmlKeyboardResponse,
+      choices: "NO_KEYS",
+      stimulus: supported ? `
+        <section class="gait-card compact center">
+          <div class="status-pill">设备检查通过</div>
+          <h2 style="margin-top:16px;">请确认实体键盘可用</h2>
+          <p>后续反应时任务需要使用 <strong>F</strong>、<strong>J</strong> 键。</p>
+          <button id="device-gate-next" class="gait-btn" type="button">继续</button>
+        </section>
+      ` : `
+        <section class="gait-card compact">
+          <h2>当前设备不适合本实验</h2>
+          <div class="warning-box">
+            本测验包含需要 F/J 实体按键的精确反应时任务，手机和平板数据无法与电脑数据直接比较。
+          </div>
+          <p>请关闭本页，改用带实体键盘的台式机或笔记本电脑重新打开。</p>
+        </section>
+      `,
+      data: baseData("DEVICE_CHECK", "screening", {
+        includeInPrimary: false,
+        deviceSupported: supported
+      }),
+      on_load: function() {
+        const button = document.getElementById("device-gate-next");
+        if (button) button.addEventListener("click", () => jsPsych.finishTrial({ deviceSupported: true }));
+      }
+    };
+  }
+
+  function demographicsTrial() {
+    const ages = Array.from({ length: 6 }, (_, i) => i + 11)
+      .map(age => `<option value="${age}">${age} 岁</option>`).join("");
+    return {
+      type: jsPsychHtmlKeyboardResponse,
+      choices: "NO_KEYS",
+      stimulus: `
+        <section class="gait-card">
+          <h2>基本信息</h2>
+          <p class="muted">只填写匿名编号，不要填写姓名、身份证号、联系方式或家庭住址。</p>
+          <div class="form-grid">
+            <div>
+              <label class="field-label" for="pid">被试编号 *</label>
+              <input id="pid" type="text" maxlength="24" autocomplete="off" placeholder="例如：S7-023">
+            </div>
+            <div>
+              <label class="field-label" for="grade">年级 *</label>
+              <select id="grade">
+                <option value="">请选择</option>
+                <option value="7">七年级</option>
+                <option value="8">八年级</option>
+                <option value="9">九年级</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label" for="age">年龄 *</label>
+              <select id="age"><option value="">请选择</option>${ages}</select>
+            </div>
+            <div>
+              <label class="field-label" for="gender">性别（可不答）</label>
+              <select id="gender">
+                <option value="prefer_not_to_say">不愿回答</option>
+                <option value="female">女</option>
+                <option value="male">男</option>
+                <option value="self_describe">其他/自行描述</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label" for="school-type">学校类型 *</label>
+              <select id="school-type">
+                <option value="">请选择</option>
+                <option value="urban_public">城市公办</option>
+                <option value="rural_public">县域/乡镇公办</option>
+                <option value="private">民办</option>
+                <option value="other">其他</option>
+              </select>
+            </div>
+          </div>
+          <div id="demo-error" class="error-text" role="alert"></div>
+          <div class="button-row">
+            <button id="demo-next" class="gait-btn" type="button">确认并继续</button>
+          </div>
+        </section>
+      `,
+      data: baseData("DEMOGRAPHICS", "formal"),
+      on_load: function() {
+        document.getElementById("pid").focus();
+        document.getElementById("demo-next").addEventListener("click", function() {
+          const participantId = document.getElementById("pid").value.trim();
+          const grade = document.getElementById("grade").value;
+          const age = document.getElementById("age").value;
+          const gender = document.getElementById("gender").value;
+          const schoolType = document.getElementById("school-type").value;
+          const error = document.getElementById("demo-error");
+
+          if (!/^[A-Za-z0-9_-]{3,24}$/.test(participantId)) {
+            error.textContent = "被试编号需为 3-24 位英文字母、数字、短横线或下划线，且不能填写姓名。";
+            return;
+          }
+          if (!grade || !age || !schoolType) {
+            error.textContent = "请完成所有带 * 的项目。";
+            return;
+          }
+
+          state.participantId = participantId;
+          state.orderGroup = hashString(participantId) % 2 === 0 ? "A" : "B";
+          state.started = true;
+
+          const participantProperties = {
+            participantId,
+            grade: Number(grade),
+            age: Number(age),
+            gender,
+            schoolType,
+            orderGroup: state.orderGroup
+          };
+          jsPsych.data.addProperties(participantProperties);
+          jsPsych.finishTrial(participantProperties);
+        });
+      }
+    };
+  }
+
+  function readinessTrial() {
+    return {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <section class="gait-card">
+          <h2>施测准备</h2>
+          <div class="info-box">
+            <p>请使用带实体键盘的电脑，在安静环境中完成。</p>
+            <p>请关闭聊天软件提示，不使用手机、搜索引擎、计算器或其他外部资料。</p>
+            <p>反应时任务请把左手食指放在 <strong>F</strong> 键，右手食指放在 <strong>J</strong> 键。</p>
+            <p>看不懂规则时，可在练习阶段向主试提问；正式任务开始后请独立作答。</p>
+          </div>
+          <div class="warning-box">
+            浏览器缩放建议保持 100%。如果页面显示不完整，请先调整窗口再开始。
+          </div>
+        </section>
+      `,
+      choices: ["我已准备好"],
+      on_load: function() {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+      },
+      data: baseData("READINESS", "instruction", {
+        includeInPrimary: false
+      })
+    };
+  }
+
+  function experimentOverviewTrial() {
+    const tasks = [
+      ["AUT", "想出物品的多种新用途"],
+      ["RAT", "找出能连接三个汉字的共同字"],
+      ["问题发现", "从材料中提出可研究的问题"],
+      ["Stop-Signal", "按箭头反应，看到“停”时停止"],
+      ["N-back", "判断数字是否与前面第 N 个相同"],
+      ["任务切换", "根据“颜色/形状”提示切换按键规则"],
+      ["AI 建议判断", "先独立作答，再核查 AI 建议"],
+      ["AI 创意优化", "先写方案，再选择性利用 AI 建议修订"],
+      ["元认知信心校准", "作答并判断自己的答案有多大可能正确"]
+    ];
+    return {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <section class="gait-card">
+          <div class="module-pill">完整流程预览</div>
+          <h2>你将按下面的固定顺序完成 9 项任务</h2>
+          <p class="subtitle">每项任务开始前都会再次说明规则，并先安排练习。完成第 3 项和第 6 项后会休息。</p>
+          <div class="sequence-grid">
+            ${tasks.map((task, index) => `
+              <div class="sequence-item">
+                <span class="sequence-number">${index + 1}</span>
+                <div><strong>${escapeHTML(task[0])}</strong><span>${escapeHTML(task[1])}</span></div>
+              </div>
+            `).join("")}
+          </div>
+          <div class="warning-box small">
+            <strong>遇到不确定时：</strong>练习阶段可以向主试询问规则；正式任务中请按自己的判断作答，不搜索、不使用计算器，也不要向他人求助。
+          </div>
+        </section>
+      `,
+      choices: ["我了解流程，开始第 1 项"],
+      data: baseData("TASK_OVERVIEW", "instruction", { includeInPrimary: false })
+    };
+  }
+
+  function fatigueTrial(label, isBreak) {
+    return {
+      type: jsPsychHtmlKeyboardResponse,
+      choices: "NO_KEYS",
+      stimulus: `
+        <section class="gait-card compact">
+          <h2>${isBreak ? "短暂休息" : "当前状态"}</h2>
+          <p>请评价你此刻的疲劳程度：</p>
+          <div class="confidence-wrap">
+            <input id="fatigue-range" type="range" min="0" max="10" step="1" value="3">
+            <div class="range-labels"><span>0 完全不累</span><strong id="fatigue-value">3</strong><span>10 非常疲劳</span></div>
+          </div>
+          ${isBreak ? '<div class="info-box">请把视线移开屏幕，眨眨眼，放松肩膀和双手。达到最短休息时间后即可继续。</div>' : ""}
+          <div class="button-row">
+            <button id="fatigue-next" class="gait-btn" type="button" ${isBreak ? "disabled" : ""}>${isBreak ? "继续（请先休息）" : "继续"}</button>
+            ${isBreak ? '<span id="break-timer" class="timer"></span>' : ""}
+          </div>
+        </section>
+      `,
+      data: baseData("FATIGUE", "formal", { checkpoint: label, isBreak }),
+      on_load: function() {
+        const started = performance.now();
+        const range = document.getElementById("fatigue-range");
+        const value = document.getElementById("fatigue-value");
+        const button = document.getElementById("fatigue-next");
+        range.addEventListener("input", () => { value.textContent = range.value; });
+
+        let interval = null;
+        if (isBreak) {
+          const timer = document.getElementById("break-timer");
+          const update = function() {
+            const left = CONFIG.breakMinMs - (performance.now() - started);
+            timer.textContent = left > 0 ? "还需 " + formatTime(left) : "可以继续";
+            if (left <= 0) {
+              button.disabled = false;
+              button.textContent = "休息结束，继续";
+              clearInterval(interval);
+            }
+          };
+          update();
+          interval = setInterval(update, 250);
+        }
+
+        button.addEventListener("click", function() {
+          if (interval) clearInterval(interval);
+          jsPsych.finishTrial({
+            fatigueRating: Number(range.value),
+            checkpoint: label,
+            breakDurationMs: round(performance.now() - started, 1)
+          });
+        });
+      }
+    };
+  }
+
+  function timedMultiEntryTrial(options) {
+    const initialRows = options.initialRows || 4;
+    const isMultiline = Boolean(options.multiline);
+    const allowEarlyFinish = options.allowEarlyFinish ?? options.phase === "practice";
+    return {
+      type: jsPsychHtmlKeyboardResponse,
+      choices: "NO_KEYS",
+      stimulus: `
+        <section class="gait-card">
+          <div class="trial-head">
+            <div>
+              <div class="module-pill">${escapeHTML(options.badge || options.taskName)}</div>
+              <h2 style="margin-bottom:0;">${escapeHTML(options.title)}</h2>
+            </div>
+            <span id="entry-timer" class="timer"></span>
+          </div>
+          <div class="material-box">${options.promptHTML}</div>
+          <p class="muted">${escapeHTML(options.guidance)}</p>
+          <div id="entry-list"></div>
+          <div class="button-row">
+            <button id="add-entry" class="gait-btn secondary" type="button">＋ 再添加一条</button>
+            <button id="finish-entry" class="gait-btn" type="button" ${allowEarlyFinish ? "" : 'style="display:none"'}>提前结束本题</button>
+          </div>
+          ${allowEarlyFinish ? "" : '<p class="muted small">正式任务采用固定时长，倒计时结束后系统会自动提交。</p>'}
+          <div id="entry-error" class="error-text"></div>
+        </section>
+      `,
+      data: baseData(options.taskName, options.phase, {
+        itemId: options.itemId,
+        itemPrompt: options.promptText,
+        timeLimitMs: options.durationMs,
+        earlyFinishAllowed: allowEarlyFinish
+      }),
+      on_load: function() {
+        const started = performance.now();
+        const deadline = started + options.durationMs;
+        const list = document.getElementById("entry-list");
+        const timer = document.getElementById("entry-timer");
+        const finishButton = document.getElementById("finish-entry");
+        const addButton = document.getElementById("add-entry");
+        const error = document.getElementById("entry-error");
+        const rowMeta = [];
+        const actionLog = [];
+        let finished = false;
+
+        function addRow(focus = false) {
+          if (rowMeta.length >= 20) return;
+          const index = rowMeta.length;
+          const wrapper = document.createElement("div");
+          wrapper.className = "entry-row";
+          wrapper.innerHTML = `
+            <div class="entry-number">${index + 1}</div>
+            ${isMultiline
+              ? '<textarea class="entry-input" rows="2" maxlength="300" placeholder="' + escapeHTML(options.placeholder) + '"></textarea>'
+              : '<input class="entry-input" type="text" maxlength="180" autocomplete="off" placeholder="' + escapeHTML(options.placeholder) + '">'}
+          `;
+          list.appendChild(wrapper);
+          const input = wrapper.querySelector(".entry-input");
+          rowMeta.push({ firstInputMs: null, lastInputMs: null });
+          input.addEventListener("input", function() {
+            const elapsed = performance.now() - started;
+            if (rowMeta[index].firstInputMs === null && input.value.trim()) rowMeta[index].firstInputMs = elapsed;
+            rowMeta[index].lastInputMs = elapsed;
+          });
+          if (!isMultiline) {
+            input.addEventListener("keydown", function(event) {
+              if (event.key === "Enter" && !event.isComposing && event.keyCode !== 229) {
+                event.preventDefault();
+                if (index === rowMeta.length - 1) addRow(true);
+              }
+            });
+          }
+          actionLog.push({ action: "add_row", row: index + 1, atMs: round(performance.now() - started, 1) });
+          if (focus) input.focus();
+        }
+
+        function collectResponses() {
+          return Array.from(list.querySelectorAll(".entry-input"))
+            .map((input, index) => ({
+              number: index + 1,
+              text: input.value.trim(),
+              firstInputMs: round(rowMeta[index].firstInputMs, 1),
+              lastInputMs: round(rowMeta[index].lastInputMs, 1)
+            }))
+            .filter(item => item.text.length > 0);
+        }
+
+        function finish(timedOut) {
+          if (finished) return;
+          if (!timedOut && !allowEarlyFinish) return;
+          const elapsed = performance.now() - started;
+          if (!timedOut && elapsed < Math.min(30000, options.durationMs * 0.35)) {
+            error.textContent = "请先认真思考一会儿；如果确实完成，可等待按钮解锁。";
+            return;
+          }
+          finished = true;
+          clearInterval(interval);
+          const responses = collectResponses();
+          jsPsych.finishTrial({
+            responsesJson: JSON.stringify(responses),
+            responseCount: responses.length,
+            elapsedMs: round(elapsed, 1),
+            timedOut,
+            earlyFinish: !timedOut && allowEarlyFinish,
+            actionLogJson: JSON.stringify(actionLog)
+          });
+        }
+
+        for (let i = 0; i < initialRows; i++) addRow(i === 0);
+        addButton.addEventListener("click", () => addRow(true));
+        if (allowEarlyFinish) {
+          finishButton.disabled = true;
+          setTimeout(() => { if (!finished) finishButton.disabled = false; }, Math.min(30000, options.durationMs * 0.35));
+          finishButton.addEventListener("click", () => finish(false));
+        }
+
+        const updateTimer = function() {
+          const remaining = deadline - performance.now();
+          timer.textContent = formatTime(remaining);
+          timer.classList.toggle("urgent", remaining <= 15000);
+          if (remaining <= 0) finish(true);
+        };
+        updateTimer();
+        const interval = setInterval(updateTimer, 200);
+      }
+    };
+  }
+
+  function ratTrial(item, phase) {
+    const duration = phase === "practice" ? Math.min(15000, CONFIG.ratItemMs) : CONFIG.ratItemMs;
+    return {
+      type: jsPsychHtmlKeyboardResponse,
+      choices: "NO_KEYS",
+      stimulus: `
+        <section class="gait-card compact">
+          <div class="trial-head">
+            <h2 style="margin:0;">找出共同联结字</h2>
+            <span id="rat-timer" class="timer"></span>
+          </div>
+          <p>想出一个汉字，使它能分别与下面三个字组成常用词语（前后位置可以不同）。</p>
+          <div class="rat-cues no-select">
+            ${item.cues.map(cue => '<div class="rat-cue">' + escapeHTML(cue) + '</div>').join("")}
+          </div>
+          <label class="field-label" for="rat-answer">共同联结字</label>
+          <input id="rat-answer" type="text" maxlength="2" autocomplete="off" inputmode="text">
+          <div class="button-row">
+            <button id="rat-submit" class="gait-btn" type="button">提交</button>
+            <button id="rat-skip" class="gait-btn secondary" type="button">不会，跳过</button>
+          </div>
+        </section>
+      `,
+      data: baseData("RAT", phase, {
+        itemId: item.id,
+        cues: item.cues.join("|"),
+        difficulty: item.difficulty,
+        correctAnswer: item.answer,
+        compounds: item.compounds.join("|"),
+        timeLimitMs: duration
+      }),
+      on_load: function() {
+        const started = performance.now();
+        const deadline = started + duration;
+        const input = document.getElementById("rat-answer");
+        const timer = document.getElementById("rat-timer");
+        let finished = false;
+
+        function finish(timedOut, skipped) {
+          if (finished) return;
+          finished = true;
+          clearInterval(interval);
+          const response = skipped ? "" : normalizeShortAnswer(input.value);
+          jsPsych.finishTrial({
+            response,
+            correct: response === normalizeShortAnswer(item.answer),
+            skipped,
+            timedOut,
+            rt: round(performance.now() - started, 1)
+          });
+        }
+
+        input.focus();
+        input.addEventListener("keydown", function(event) {
+          if (event.key === "Enter" && !event.isComposing && event.keyCode !== 229) finish(false, false);
+        });
+        document.getElementById("rat-submit").addEventListener("click", () => finish(false, false));
+        document.getElementById("rat-skip").addEventListener("click", () => finish(false, true));
+
+        const update = function() {
+          const remaining = deadline - performance.now();
+          timer.textContent = formatTime(remaining);
+          timer.classList.toggle("urgent", remaining <= 5000);
+          if (remaining <= 0) finish(true, false);
+        };
+        update();
+        const interval = setInterval(update, 150);
+      }
+    };
+  }
+
+  function practiceFeedback(taskName, formatter, duration = 900) {
+    return {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: function() {
+        const rows = jsPsych.data.get().filterCustom(row => row.taskName === taskName && row.phase === "practice").values();
+        const row = rows[rows.length - 1] || {};
+        return '<section class="gait-card compact center">' + formatter(row) + '</section>';
+      },
+      choices: "NO_KEYS",
+      trial_duration: duration,
+      data: baseData(taskName + "_FEEDBACK", "practice", { includeInPrimary: false })
+    };
+  }
+
+  function balancedStopDefinitions(totalTrials, includeAIDistractor = false, balanceOffset = 0) {
+    const stopCount = Math.max(2, Math.round(totalTrials * 0.25));
+    const goCount = totalTrials - stopCount;
+
+    function buildSubset(count, isStop) {
+      if (!includeAIDistractor) {
+        return Array.from({ length: count }, (_, index) => ({
+          isStop,
+          direction: index % 2 === 0 ? "left" : "right",
+          aiDistractor: false
+        }));
+      }
+
+      const aiCount = Math.floor(count / 2);
+      const leftCount = Math.floor(count / 2);
+      const aiLeftCount = balanceOffset % 2 === 0 ? Math.ceil(aiCount / 2) : Math.floor(aiCount / 2);
+      const cellCounts = [
+        { direction: "left", aiDistractor: true, count: aiLeftCount },
+        { direction: "right", aiDistractor: true, count: aiCount - aiLeftCount },
+        { direction: "left", aiDistractor: false, count: leftCount - aiLeftCount },
+        { direction: "right", aiDistractor: false, count: count - leftCount - (aiCount - aiLeftCount) }
+      ];
+      return cellCounts.flatMap(cell =>
+        Array.from({ length: cell.count }, () => ({
+          isStop,
+          direction: cell.direction,
+          aiDistractor: cell.aiDistractor
+        }))
+      );
+    }
+
+    return shuffle([
+      ...buildSubset(stopCount, true),
+      ...buildSubset(goCount, false)
+    ]);
+  }
+
+  function stopSignalTrial(definition, phase, block, trialInBlock) {
+    let currentSSD = null;
+    return {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+        <section class="gait-card compact rt-shell no-select">
+          <div class="stop-ai-distractor ${definition.aiDistractor ? "active" : ""}">
+            ${definition.aiDistractor ? "AI 提示：系统预测你会做出正确反应。" : ""}
+          </div>
+          <div id="stop-cue" class="stop-cue">停</div>
+          <div class="arrow-stimulus">${definition.direction === "left" ? "←" : "→"}</div>
+        </section>
+      `,
+      choices: ["f", "j"],
+      response_ends_trial: true,
+      trial_duration: 1000,
+      post_trial_gap: 250,
+      data: baseData("STOP_SIGNAL", phase, {
+        block,
+        trialInBlock,
+        trialType: definition.isStop ? "stop" : "go",
+        direction: definition.direction,
+        aiDistractor: Boolean(definition.aiDistractor),
+        correctKey: definition.direction === "left" ? "f" : "j"
+      }),
+      on_start: function(trial) {
+        currentSSD = definition.isStop ? state.stopSSD : null;
+        trial.data.stopSignalDelayMs = currentSSD;
+      },
+      on_load: function() {
+        if (!definition.isStop) return;
+        jsPsych.pluginAPI.setTimeout(function() {
+          const cue = document.getElementById("stop-cue");
+          if (cue) cue.classList.add("active");
+        }, currentSSD);
+      },
+      on_finish: function(data) {
+        const responded = data.response !== null;
+        if (definition.isStop) {
+          data.inhibitionSuccess = !responded;
+          data.correct = !responded;
+          data.responseBeforeStopSignal = responded && Number.isFinite(data.rt) && data.rt < currentSSD;
+          if (!responded) state.stopSSD = Math.min(700, state.stopSSD + 50);
+          else state.stopSSD = Math.max(100, state.stopSSD - 50);
+          data.nextStopSignalDelayMs = state.stopSSD;
+        } else {
+          data.inhibitionSuccess = null;
+          data.correct = responded && data.response === data.correctKey;
+          data.goOmission = !responded;
+          data.goCommissionError = responded && data.response !== data.correctKey;
+        }
+      }
+    };
+  }
+
+  function writeStopSummary() {
+    const rows = jsPsych.data.get().filterCustom(row =>
+      row.taskName === "STOP_SIGNAL" && row.phase === "formal"
+    ).values();
+
+    function conditionMetrics(subset) {
+      const goRows = subset.filter(row => row.trialType === "go");
+      const stopRows = subset.filter(row => row.trialType === "stop");
+      const correctGoRTs = goRows.filter(row => row.correct && Number.isFinite(row.rt)).map(row => row.rt);
+      const pRespond = stopRows.length
+        ? stopRows.filter(row => !row.inhibitionSuccess).length / stopRows.length
+        : null;
+      const meanSSD = mean(stopRows.map(row => row.stopSignalDelayMs));
+      const integrationRT = Number.isFinite(pRespond) ? quantile(correctGoRTs, pRespond) : null;
+      const ssrt = Number.isFinite(integrationRT) && Number.isFinite(meanSSD) ? integrationRT - meanSSD : null;
+      const goOmissionRate = goRows.length ? goRows.filter(row => row.goOmission).length / goRows.length : null;
+      const ssrtValid =
+        Number.isFinite(pRespond) && pRespond >= 0.25 && pRespond <= 0.75 &&
+        Number.isFinite(goOmissionRate) && goOmissionRate <= 0.10 &&
+        Number.isFinite(ssrt) && ssrt >= 0;
+      return {
+        trialCount: subset.length,
+        goTrialCount: goRows.length,
+        stopTrialCount: stopRows.length,
+        goAccuracy: goRows.length ? round(goRows.filter(row => row.correct).length / goRows.length) : null,
+        goOmissionRate: round(goOmissionRate),
+        meanCorrectGoRT: round(mean(correctGoRTs), 1),
+        stopRespondRate: round(pRespond),
+        stopSuccessRate: stopRows.length ? round(stopRows.filter(row => row.inhibitionSuccess).length / stopRows.length) : null,
+        meanStopSignalDelayMs: round(meanSSD, 1),
+        ssrtRawIntegrationEstimateMs: round(ssrt, 1),
+        ssrtIntegrationEstimateMs: ssrtValid ? round(ssrt, 1) : null,
+        ssrtValid
+      };
+    }
+
+    const overall = conditionMetrics(rows);
+    const withAI = conditionMetrics(rows.filter(row => row.aiDistractor === true));
+    const withoutAI = conditionMetrics(rows.filter(row => row.aiDistractor === false));
+
+    writeSummary("STOP_SIGNAL", {
+      formalTrialCount: rows.length,
+      goAccuracy: overall.goAccuracy,
+      goOmissionRate: overall.goOmissionRate,
+      meanCorrectGoRT: overall.meanCorrectGoRT,
+      medianCorrectGoRT: round(median(rows.filter(row =>
+        row.trialType === "go" && row.correct && Number.isFinite(row.rt)
+      ).map(row => row.rt)), 1),
+      stopRespondRate: overall.stopRespondRate,
+      meanStopSignalDelayMs: overall.meanStopSignalDelayMs,
+      ssrtRawIntegrationEstimateMs: overall.ssrtRawIntegrationEstimateMs,
+      ssrtIntegrationEstimateMs: overall.ssrtIntegrationEstimateMs,
+      ssrtValid: overall.ssrtValid,
+      ssrtValidityRule: "stopRespondRate 0.25-0.75; goOmissionRate <= 0.10; SSRT >= 0",
+      ssrtMethod: "integration_quantile_goRT_minus_meanSSD",
+      aiDistractorDesign: "固定无答案AI横条；在go/stop试次内各约50%平衡",
+      aiDistractorMetricsJson: JSON.stringify({ withAI, withoutAI }),
+      aiGoRTCostMs: Number.isFinite(withAI.meanCorrectGoRT) && Number.isFinite(withoutAI.meanCorrectGoRT)
+        ? round(withAI.meanCorrectGoRT - withoutAI.meanCorrectGoRT, 1) : null,
+      aiGoAccuracyChange: Number.isFinite(withAI.goAccuracy) && Number.isFinite(withoutAI.goAccuracy)
+        ? round(withAI.goAccuracy - withoutAI.goAccuracy) : null,
+      aiStopSuccessChange: Number.isFinite(withAI.stopSuccessRate) && Number.isFinite(withoutAI.stopSuccessRate)
+        ? round(withAI.stopSuccessRate - withoutAI.stopSuccessRate) : null,
+      aiSSRTChangeMs: withAI.ssrtValid && withoutAI.ssrtValid
+        ? round(withAI.ssrtIntegrationEstimateMs - withoutAI.ssrtIntegrationEstimateMs, 1) : null,
+      aiConditionSSRTStatus: "探索性指标：每个条件的stop试次数较少，正式解释前需检查稳定性"
+    });
+  }
+
+  function stopSignalModule(moduleNumber) {
+    const timeline = [
+      moduleIntro(
+        moduleNumber,
+        "反应抑制：Stop-Signal",
+        "测量在快速反应过程中停止动作的能力。",
+        `<div class="rule-grid">
+          <div class="rule-item"><h3>普通箭头</h3><p>看到左箭头按 <span class="key-chip">F</span>，看到右箭头按 <span class="key-chip">J</span>。请尽量又快又准。</p></div>
+          <div class="rule-item"><h3>出现红色“停”</h3><p>少数箭头出现后会再显示红色“停”。一旦看到“停”，本题就<strong>不要按任何键</strong>。</p></div>
+          <div class="rule-item"><h3>AI 横条</h3><p>部分试次会出现固定的 AI 提示横条。它不提供答案，请忽略横条，仍按箭头和“停”的规则作答。</p></div>
+          <div class="rule-item"><h3>最重要的要求</h3><p>不要故意放慢速度等待“停”字。普通箭头立即反应；看到“停”时尽力收住动作。</p></div>
+        </div>`
+      )
+    ];
+
+    const resetPractice = simpleMessage(
+      "练习开始",
+      "<p>请把两手食指放在 F 和 J 键上。练习后会给出反馈。</p>",
+      "进入练习"
+    );
+    resetPractice.on_start = () => { state.stopSSD = 250; };
+    timeline.push(resetPractice);
+
+    balancedStopDefinitions(CONFIG.stopPracticeTrials, true, 0).forEach((definition, index) => {
+      timeline.push(fixationTrial("STOP_SIGNAL", "practice", 300));
+      timeline.push(stopSignalTrial(definition, "practice", 0, index + 1));
+      timeline.push(practiceFeedback("STOP_SIGNAL", function(row) {
+        if (row.trialType === "stop") {
+          return row.inhibitionSuccess
+            ? '<div class="success-text">成功停住</div>'
+            : '<div class="error-text">这次按键了；看到“停”时请忍住不按。</div>';
+        }
+        if (row.goOmission) return '<div class="error-text">漏答：有方向箭头时要尽快按键。</div>';
+        return row.correct
+          ? '<div class="success-text">正确</div>'
+          : '<div class="error-text">按错方向：左 F，右 J。</div>';
+      }, 600));
+    });
+
+    const formalStart = simpleMessage(
+      "练习结束",
+      "<p>接下来是正式任务，不再显示对错。请保持同样速度，不要等待“停”字。</p>",
+      "开始正式任务"
+    );
+    formalStart.on_start = () => { state.stopSSD = 250; };
+    timeline.push(formalStart);
+
+    for (let block = 1; block <= CONFIG.stopBlocks; block++) {
+      const definitions = balancedStopDefinitions(CONFIG.stopTrialsPerBlock, true, block);
+      definitions.forEach((definition, index) => {
+        timeline.push(fixationTrial("STOP_SIGNAL", "formal", 250 + Math.floor(Math.random() * 151)));
+        timeline.push(stopSignalTrial(definition, "formal", block, index + 1));
+      });
+      if (block < CONFIG.stopBlocks) {
+        timeline.push(simpleMessage(
+          "本区组完成",
+          "<p>短暂放松手指，准备好后继续。仍然要尽快反应，不要等停止信号。</p>",
+          "继续下一组",
+          { taskName: "STOP_SIGNAL", blockBreakAfter: block }
+        ));
+      }
+    }
+    timeline.push(moduleComplete("反应抑制", writeStopSummary));
+    return timeline;
+  }
+
+  function generateNBackSequence(n, length, targetRate = 0.30) {
+    const symbols = ["2", "3", "4", "5", "6", "7", "8", "9"];
+    const eligible = Array.from({ length: Math.max(0, length - n) }, (_, i) => i + n);
+    const targetCount = eligible.length
+      ? Math.min(eligible.length, Math.max(1, Math.round(eligible.length * targetRate)))
+      : 0;
+    const targetPositions = new Set(shuffle(eligible).slice(0, targetCount));
+    const sequence = [];
+    for (let i = 0; i < length; i++) {
+      if (i >= n && targetPositions.has(i)) {
+        sequence.push(sequence[i - n]);
+      } else {
+        const forbidden = i >= n ? sequence[i - n] : null;
+        sequence.push(shuffle(symbols.filter(symbol => symbol !== forbidden))[0]);
+      }
+    }
+    return sequence.map((symbol, index) => {
+      const isStarter = index < n;
+      const comparisonSymbol = isStarter ? null : sequence[index - n];
+      const target = isStarter ? null : symbol === comparisonSymbol;
+      return {
+        symbol,
+        comparisonSymbol,
+        isStarter,
+        scorable: !isStarter,
+        target,
+        correctKey: isStarter ? null : (target ? "j" : "f"),
+        position: index + 1
+      };
+    });
+  }
+
+  function nBackTrial(item, n, phase, block) {
+    const responsePrompt = item.isStarter
+      ? `序列开始：请先记住这个数字，不需要按键`
+      : `按 F＝不同　·　按 J＝相同`;
+    return {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+        <section class="gait-card compact rt-shell no-select">
+          <div class="module-pill">${n}-back 工作记忆</div>
+          <div class="rt-map">${responsePrompt}</div>
+          <div id="nback-stimulus" class="nback-stimulus">${item.symbol}</div>
+        </section>
+      `,
+      choices: item.isStarter ? "NO_KEYS" : ["f", "j"],
+      response_ends_trial: false,
+      trial_duration: 1700,
+      post_trial_gap: 200,
+      data: baseData("NBACK", phase, {
+        nLevel: n,
+        block,
+        position: item.position,
+        stimulusSymbol: item.symbol,
+        comparisonSymbol: item.comparisonSymbol,
+        isStarter: item.isStarter,
+        scorable: item.scorable,
+        responseRequired: !item.isStarter,
+        target: item.target,
+        correctKey: item.correctKey
+      }),
+      on_load: function() {
+        jsPsych.pluginAPI.setTimeout(function() {
+          const stimulus = document.getElementById("nback-stimulus");
+          if (stimulus) stimulus.textContent = "";
+        }, 600);
+      },
+      on_finish: function(data) {
+        const pressed = data.response !== null;
+        data.pressed = pressed;
+        Object.assign(data, scoreNBackResponse(data.isStarter, data.target, data.response));
+      }
+    };
+  }
+
+  function scoreNBackResponse(isStarter, target, response) {
+    if (isStarter) return { outcome: "starter", correct: null };
+    if (response === null) return { outcome: "omission", correct: false };
+    if (target === true && response === "j") return { outcome: "hit", correct: true };
+    if (target === true) return { outcome: "miss", correct: false };
+    if (response === "j") return { outcome: "false_alarm", correct: false };
+    return { outcome: "correct_rejection", correct: true };
+  }
+
+  function nBackPracticeFeedbackText(row, n) {
+    if (row.isStarter) {
+      return `<div class="success-text">记忆开始数字：${escapeHTML(row.stimulusSymbol)}</div>
+        <p>这是序列的起始数字，还不能进行 ${n}-back 比较，所以不需要按键。</p>`;
+    }
+    const relation = row.target ? "相同" : "不同";
+    const expectedKey = row.target ? "J" : "F";
+    const comparison = `当前数字 ${escapeHTML(row.stimulusSymbol)} 与前面第 ${n} 个数字 ${escapeHTML(row.comparisonSymbol)} ${relation}`;
+    if (row.correct) {
+      return `<div class="success-text">正确</div><p>${comparison}，所以应该按 ${expectedKey}。</p>`;
+    }
+    if (row.outcome === "omission") {
+      return `<div class="error-text">未检测到按键</div><p>${comparison}，正确按键是 ${expectedKey}。每个可判断数字都要作答。</p>`;
+    }
+    return `<div class="error-text">错误</div><p>${comparison}，正确按键是 ${expectedKey}。</p>`;
+  }
+
+  function inverseNormal(probability) {
+    if (!(probability > 0 && probability < 1)) return null;
+    const a = [-39.6968302866538, 220.946098424521, -275.928510446969, 138.357751867269, -30.6647980661472, 2.50662827745924];
+    const b = [-54.4760987982241, 161.585836858041, -155.698979859887, 66.8013118877197, -13.2806815528857];
+    const c = [-0.00778489400243029, -0.322396458041136, -2.40075827716184, -2.54973253934373, 4.37466414146497, 2.93816398269878];
+    const d = [0.00778469570904146, 0.32246712907004, 2.445134137143, 3.75440866190742];
+    const low = 0.02425;
+    const high = 1 - low;
+    let q;
+    let r;
+    if (probability < low) {
+      q = Math.sqrt(-2 * Math.log(probability));
+      return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+        ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+    }
+    if (probability > high) {
+      q = Math.sqrt(-2 * Math.log(1 - probability));
+      return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+        ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+    }
+    q = probability - 0.5;
+    r = q * q;
+    return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q /
+      (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+  }
+
+  function nBackMetrics(rows) {
+    const scoredRows = rows.filter(row => row.scorable === true && row.isStarter !== true);
+    const targets = scoredRows.filter(row => row.target === true);
+    const nonTargets = scoredRows.filter(row => row.target === false);
+    const hits = targets.filter(row => row.outcome === "hit").length;
+    const falseAlarms = nonTargets.filter(row => row.outcome === "false_alarm").length;
+    const omissions = scoredRows.filter(row => row.outcome === "omission").length;
+    const omissionRate = scoredRows.length ? omissions / scoredRows.length : null;
+    const hitRateCorrected = (hits + 0.5) / (targets.length + 1);
+    const faRateCorrected = (falseAlarms + 0.5) / (nonTargets.length + 1);
+    const dPrime = inverseNormal(hitRateCorrected) - inverseNormal(faRateCorrected);
+    const dPrimeValid = Number.isFinite(omissionRate) && omissionRate <= 0.10;
+    return {
+      trials: rows.length,
+      scoredTrials: scoredRows.length,
+      starterTrials: rows.length - scoredRows.length,
+      targetCount: targets.length,
+      hitRate: targets.length ? round(hits / targets.length) : null,
+      falseAlarmRate: nonTargets.length ? round(falseAlarms / nonTargets.length) : null,
+      omissionRate: round(omissionRate),
+      accuracy: scoredRows.length ? round(scoredRows.filter(row => row.correct).length / scoredRows.length) : null,
+      meanHitRT: round(mean(scoredRows.filter(row => row.outcome === "hit").map(row => row.rt)), 1),
+      meanCorrectRT: round(mean(scoredRows.filter(row => row.correct).map(row => row.rt)), 1),
+      dPrimeLoglinear: dPrimeValid ? round(dPrime) : null,
+      dPrimeValid,
+      dPrimeValidityRule: "omissionRate <= 0.10"
+    };
+  }
+
+  function writeNBackSummary() {
+    const rows = jsPsych.data.get().filterCustom(row =>
+      row.taskName === "NBACK" && row.phase === "formal"
+    ).values();
+    const oneBack = nBackMetrics(rows.filter(row => row.nLevel === 1));
+    const twoBack = nBackMetrics(rows.filter(row => row.nLevel === 2));
+    writeSummary("NBACK", {
+      formalTrialCount: rows.length,
+      scoredFormalTrialCount: oneBack.scoredTrials + twoBack.scoredTrials,
+      oneBackJson: JSON.stringify(oneBack),
+      twoBackJson: JSON.stringify(twoBack),
+      oneBackDPrime: oneBack.dPrimeLoglinear,
+      twoBackDPrime: twoBack.dPrimeLoglinear,
+      oneBackDPrimeValid: oneBack.dPrimeValid,
+      twoBackDPrimeValid: twoBack.dPrimeValid,
+      oneBackOmissionRate: oneBack.omissionRate,
+      twoBackOmissionRate: twoBack.omissionRate,
+      overallAccuracy: oneBack.scoredTrials + twoBack.scoredTrials
+        ? round((
+          rows.filter(row => row.scorable === true && row.correct === true).length
+        ) / (oneBack.scoredTrials + twoBack.scoredTrials))
+        : null
+    });
+  }
+
+  function nBackModule(moduleNumber) {
+    const timeline = [
+      moduleIntro(
+        moduleNumber,
+        "工作记忆：N-back",
+        "测量持续更新和保持信息的能力。",
+        `<div class="rule-grid">
+          <div class="rule-item"><h3>每题都要判断</h3><p>当前数字与前面第 N 个数字<strong>不同</strong>，按 <span class="key-chip">F</span>；<strong>相同</strong>，按 <span class="key-chip">J</span>。</p></div>
+          <div class="rule-item"><h3>1-back</h3><p>比较前 1 个数字。例如“3、7、7”：最后一个 7 与前一个相同，应按 J。</p></div>
+          <div class="rule-item"><h3>2-back</h3><p>比较前 2 个数字。例如“4、8、4”：最后一个 4 与前两个位置的 4 相同，应按 J。</p></div>
+          <div class="rule-item"><h3>序列开始</h3><p>每段最前面的 N 个数字还没有比较对象，只需要记住，不按键，也不计分。练习时每题后都会显示对错。</p></div>
+        </div>`
+      ),
+      simpleMessage(
+        "1-back 练习",
+        "<p>只与<strong>前一个</strong>数字比较：不同按 F，相同按 J。除第一个记忆数字外，每个数字都必须按键。</p><div class=\"example-box\">例如“3、7、7”：第二个 7 与前一个 7 相同，因此按 J。</div>",
+        "开始 1-back 练习"
+      )
+    ];
+
+    generateNBackSequence(1, CONFIG.nbackPracticeTrials, 0.35).forEach(item => {
+      timeline.push(nBackTrial(item, 1, "practice", 0));
+      timeline.push(practiceFeedback("NBACK", row => nBackPracticeFeedbackText(row, 1), 1200));
+    });
+
+    timeline.push(simpleMessage(
+      "1-back 正式任务",
+      "<p>接下来继续使用 1-back 规则：不同按 F，相同按 J。除序列开始数字外，每题都要按键。正式任务不再显示反馈。</p>",
+      "开始 1-back 正式任务"
+    ));
+
+    generateNBackSequence(1, CONFIG.nbackTrialsPerLevel, 0.30).forEach(item => {
+      timeline.push(nBackTrial(item, 1, "formal", 1));
+    });
+
+    timeline.push(simpleMessage(
+      "2-back 练习",
+      "<p>规则现在改变：当前数字要与<strong>前面第 2 个</strong>数字比较，不同按 F，相同按 J。最开始两个数字只需记住。</p><div class=\"example-box\">例如“4、8、4”：最后一个 4 与前面第 2 个位置的 4 相同，应按 J。</div>",
+      "开始 2-back 练习"
+    ));
+
+    generateNBackSequence(2, CONFIG.nbackTwoBackPracticeTrials, 0.35).forEach(item => {
+      timeline.push(nBackTrial(item, 2, "practice", 0));
+      timeline.push(practiceFeedback("NBACK", row => nBackPracticeFeedbackText(row, 2), 1200));
+    });
+
+    timeline.push(simpleMessage(
+      "2-back 正式任务",
+      "<p>练习结束。接下来保持 2-back 规则：不同按 F，相同按 J。除最开始两个记忆数字外，每题都要按键。正式任务不再显示反馈。</p>",
+      "开始 2-back 正式任务"
+    ));
+
+    generateNBackSequence(2, CONFIG.nbackTrialsPerLevel, 0.30).forEach(item => {
+      timeline.push(nBackTrial(item, 2, "formal", 2));
+    });
+    timeline.push(moduleComplete("工作记忆", writeNBackSummary));
+    return timeline;
+  }
+
+  const SWITCH_STIMULI = Object.freeze([
+    { color: "orange", shape: "circle" },
+    { color: "orange", shape: "triangle" },
+    { color: "blue", shape: "circle" },
+    { color: "blue", shape: "triangle" }
+  ]);
+
+  function switchCorrectKey(rule, stimulus) {
+    if (rule === "color") return stimulus.color === "orange" ? "f" : "j";
+    return stimulus.shape === "circle" ? "f" : "j";
+  }
+
+  function switchTrial(rule, stimulus, phase, blockType, transition, block, trialInBlock) {
+    const shapeHTML = stimulus.shape === "circle"
+      ? `<div class="shape-circle ${stimulus.color}"></div>`
+      : `<div class="shape-triangle ${stimulus.color}"></div>`;
+    return {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+        <section class="gait-card compact rt-shell no-select">
+          <div class="switch-cue">规则：${rule === "color" ? "颜色" : "形状"}</div>
+          <div class="rt-map">颜色：橙 F / 蓝 J　　形状：圆 F / 三角 J</div>
+          <div class="switch-shape-wrap">${shapeHTML}</div>
+        </section>
+      `,
+      choices: ["f", "j"],
+      response_ends_trial: true,
+      trial_duration: 1600,
+      post_trial_gap: 250,
+      data: baseData("TASK_SWITCH", phase, {
+        rule,
+        stimulusColor: stimulus.color,
+        stimulusShape: stimulus.shape,
+        blockType,
+        transition,
+        block,
+        trialInBlock,
+        correctKey: switchCorrectKey(rule, stimulus)
+      }),
+      on_finish: function(data) {
+        data.correct = data.response !== null && data.response === data.correctKey;
+        data.omission = data.response === null;
+        data.congruency =
+          (data.stimulusColor === "orange" && data.stimulusShape === "circle") ||
+          (data.stimulusColor === "blue" && data.stimulusShape === "triangle")
+            ? "congruent" : "incongruent";
+      }
+    };
+  }
+
+  function repeatStimuli(total) {
+    const result = [];
+    for (let i = 0; i < total; i++) result.push(SWITCH_STIMULI[i % SWITCH_STIMULI.length]);
+    return shuffle(result);
+  }
+
+  function mixedRuleSequence(total) {
+    const rules = [Math.random() < 0.5 ? "color" : "shape"];
+    let repeatsInRow = 0;
+    for (let i = 1; i < total; i++) {
+      let shouldSwitch = Math.random() < 0.5;
+      if (repeatsInRow >= 2) shouldSwitch = true;
+      if (shouldSwitch) {
+        rules.push(rules[i - 1] === "color" ? "shape" : "color");
+        repeatsInRow = 0;
+      } else {
+        rules.push(rules[i - 1]);
+        repeatsInRow += 1;
+      }
+    }
+    return rules;
+  }
+
+  function writeSwitchSummary() {
+    const rows = jsPsych.data.get().filterCustom(row =>
+      row.taskName === "TASK_SWITCH" && row.phase === "formal"
+    ).values();
+    const correct = rows.filter(row => row.correct && Number.isFinite(row.rt) && row.rt >= 150);
+    const pureRT = mean(correct.filter(row => row.blockType === "pure").map(row => row.rt));
+    const repeatRT = mean(correct.filter(row => row.blockType === "mixed" && row.transition === "repeat").map(row => row.rt));
+    const switchRT = mean(correct.filter(row => row.blockType === "mixed" && row.transition === "switch").map(row => row.rt));
+    writeSummary("TASK_SWITCH", {
+      formalTrialCount: rows.length,
+      overallAccuracy: rows.length ? round(rows.filter(row => row.correct).length / rows.length) : null,
+      meanPureRT: round(pureRT, 1),
+      meanMixedRepeatRT: round(repeatRT, 1),
+      meanMixedSwitchRT: round(switchRT, 1),
+      switchCostMs: Number.isFinite(switchRT) && Number.isFinite(repeatRT) ? round(switchRT - repeatRT, 1) : null,
+      mixedCostMs: Number.isFinite(repeatRT) && Number.isFinite(pureRT) ? round(repeatRT - pureRT, 1) : null,
+      errorRate: rows.length ? round(rows.filter(row => !row.correct).length / rows.length) : null
+    });
+  }
+
+  function taskSwitchModule(moduleNumber) {
+    const timeline = [
+      moduleIntro(
+        moduleNumber,
+        "认知灵活性：任务切换",
+        "测量在两套规则之间快速切换的能力。",
+        `<div class="rule-grid">
+          <div class="rule-item"><h3>先看上方规则</h3><p>每题最上方会写“颜色”或“形状”。必须先读规则，再判断中间的图形。</p></div>
+          <div class="rule-item"><h3>颜色规则</h3><p>橙色按 <span class="key-chip">F</span>，蓝色按 <span class="key-chip">J</span>，此时忽略形状。</p></div>
+          <div class="rule-item"><h3>形状规则</h3><p>圆形按 <span class="key-chip">F</span>，三角形按 <span class="key-chip">J</span>，此时忽略颜色。</p></div>
+          <div class="rule-item"><h3>混合区组</h3><p>后面的规则可能每题变化。不要沿用上一题规则，每次都重新看提示。</p></div>
+        </div>`
+      ),
+      simpleMessage(
+        "规则练习",
+        "<p><strong>颜色规则：</strong>橙 F，蓝 J。<br><strong>形状规则：</strong>圆 F，三角 J。</p>",
+        "开始练习"
+      )
+    ];
+
+    const practicePureCount = DEMO_MODE ? 2 : 4;
+    ["color", "shape"].forEach((rule, ruleIndex) => {
+      repeatStimuli(practicePureCount).forEach((stimulus, index) => {
+        timeline.push(switchTrial(rule, stimulus, "practice", "pure", "pure", ruleIndex + 1, index + 1));
+        timeline.push(practiceFeedback("TASK_SWITCH", row => row.correct
+          ? '<div class="success-text">正确</div>'
+          : '<div class="error-text">请先看上方规则，再按对应键。</div>', 500));
+      });
+    });
+
+    const mixedPracticeRules = mixedRuleSequence(DEMO_MODE ? 4 : 8);
+    repeatStimuli(mixedPracticeRules.length).forEach((stimulus, index) => {
+      const transition = index === 0 ? "first" :
+        (mixedPracticeRules[index] === mixedPracticeRules[index - 1] ? "repeat" : "switch");
+      timeline.push(switchTrial(mixedPracticeRules[index], stimulus, "practice", "mixed", transition, 3, index + 1));
+      timeline.push(practiceFeedback("TASK_SWITCH", row => row.correct
+        ? '<div class="success-text">正确</div>'
+        : '<div class="error-text">规则可能变化，请每题都先看提示。</div>', 500));
+    });
+
+    timeline.push(simpleMessage(
+      "正式任务",
+      "<p>先完成两个单规则区组，再进入混合规则区组。正式任务不再显示反馈。</p>",
+      "开始正式任务"
+    ));
+
+    function pureBlockTimeline(ruleOrder) {
+      const trials = [];
+      ruleOrder.forEach((rule, blockIndex) => {
+        repeatStimuli(CONFIG.switchPureTrials).forEach((stimulus, index) => {
+          trials.push(switchTrial(rule, stimulus, "formal", "pure", "pure", blockIndex + 1, index + 1));
+        });
+      });
+      return trials;
+    }
+
+    timeline.push({
+      timeline: pureBlockTimeline(["color", "shape"]),
+      conditional_function: () => state.orderGroup === "A"
+    });
+    timeline.push({
+      timeline: pureBlockTimeline(["shape", "color"]),
+      conditional_function: () => state.orderGroup === "B"
+    });
+
+    const rules = mixedRuleSequence(CONFIG.switchMixedTrials);
+    repeatStimuli(rules.length).forEach((stimulus, index) => {
+      const transition = index === 0 ? "first" : (rules[index] === rules[index - 1] ? "repeat" : "switch");
+      timeline.push(switchTrial(rules[index], stimulus, "formal", "mixed", transition, 3, index + 1));
+    });
+
+    timeline.push(moduleComplete("认知灵活性", writeSwitchSummary));
+    return timeline;
+  }
+
+  function writeAUTSummary() {
+    const rows = jsPsych.data.get().filterCustom(row => row.taskName === "AUT" && row.phase === "formal").values();
+    writeSummary("AUT", {
+      formalItemCount: rows.length,
+      fluencyRawTotal: rows.reduce((sum, row) => sum + (Number(row.responseCount) || 0), 0),
+      meanIdeasPerItem: round(mean(rows.map(row => Number(row.responseCount) || 0))),
+      earlyFinishItemCount: rows.filter(row => row.earlyFinish).length,
+      scoringStatus: "待两名评分者评定灵活性、独创性、适切性与精致性；AI 评分仅作复核"
+    });
+  }
+
+  function autModule(moduleNumber) {
+    const timeline = [
+      moduleIntro(
+        moduleNumber,
+        "发散思维：替代用途任务（AUT）",
+        "考察能否为日常物品产生多种、新颖而可行的用途。",
+        `<div class="rule-grid">
+          <div class="rule-item"><h3>你要做什么</h3><p>看到一种常见物品后，想出它在通常用途以外还能怎样使用。</p></div>
+          <div class="rule-item"><h3>怎样填写</h3><p>一行只写一个用途。想到新用途后可点击“再添加一条”，尽量写出多个不同类别的想法。</p></div>
+          <div class="rule-item"><h3>什么样的回答更好</h3><p>用途要新颖，但也要具体、能够解释得通。不要只把同一个想法换几个词。</p></div>
+          <div class="rule-item"><h3>正式任务</h3><p>共有 2 件物品，每题采用固定倒计时；请在时间内持续思考，不搜索外部资料。</p></div>
+        </div>
+        <div class="example-box"><strong>填写示例：</strong>如果物品是“毛巾”，可以写“卷起来垫在门下防止门晃动”。只写“还能用”不算具体用途。</div>`
+      ),
+      timedMultiEntryTrial({
+        taskName: "AUT",
+        phase: "practice",
+        itemId: "AUT_PRACTICE_TOWEL",
+        badge: "练习",
+        title: "毛巾还能做什么？",
+        promptText: "请想出毛巾除了擦拭以外的其他用途。",
+        promptHTML: "<strong>练习物品：毛巾</strong><br>请想出毛巾除了擦拭以外的其他用途。",
+        guidance: "一行一个想法。练习内容不会进入正式 CSV。",
+        placeholder: "输入一个不同的用途",
+        durationMs: CONFIG.autPracticeMs,
+        initialRows: 3,
+        multiline: false
+      }),
+      simpleMessage(
+        "练习结束",
+        "<p>正式任务共两件物品。请同时兼顾数量、类别差异和可行性，不要只把同一想法换几个词。</p>",
+        "开始正式任务"
+      )
+    ];
+
+    [
+      {
+        id: "AUT_PAPERCLIP",
+        title: "回形针还能做什么？",
+        text: "请想出回形针除了夹住纸张以外的其他用途。可以弯折或与常见物品组合，但要具体、可行。"
+      },
+      {
+        id: "AUT_CARDBOARD_BOX",
+        title: "纸箱还能做什么？",
+        text: "请想出纸箱除了装东西以外的其他用途。可以改变形状或组合使用，但要说明实际用途。"
+      }
+    ].forEach(item => {
+      timeline.push(timedMultiEntryTrial({
+        taskName: "AUT",
+        phase: "formal",
+        itemId: item.id,
+        badge: "正式任务",
+        title: item.title,
+        promptText: item.text,
+        promptHTML: "<strong>" + escapeHTML(item.title) + "</strong><br>" + escapeHTML(item.text),
+        guidance: "一行一个想法；不要填写姓名或同学信息。",
+        placeholder: "输入一个不同的用途",
+        durationMs: CONFIG.autFormalMs,
+        initialRows: 5,
+        multiline: false
+      }));
+    });
+    timeline.push(moduleComplete("发散思维", writeAUTSummary));
+    return timeline;
+  }
+
+  const RAT_PRACTICE_ITEMS = Object.freeze([
+    { id: "RAT_P1", cues: ["开", "平", "果"], answer: "水", compounds: ["开水", "水平", "水果"], difficulty: "practice" },
+    { id: "RAT_P2", cues: ["读", "包", "图"], answer: "书", compounds: ["读书", "书包", "图书"], difficulty: "practice" }
+  ]);
+
+  const RAT_FORMAL_ITEMS = Object.freeze([
+    { id: "RAT_E1", cues: ["空", "球", "生"], answer: "气", compounds: ["空气", "气球", "生气"], difficulty: "easy" },
+    { id: "RAT_E2", cues: ["阳", "明", "灯"], answer: "光", compounds: ["阳光", "光明", "灯光"], difficulty: "easy" },
+    { id: "RAT_E3", cues: ["校", "大", "成"], answer: "长", compounds: ["校长", "长大", "成长"], difficulty: "easy" },
+    { id: "RAT_E4", cues: ["大", "方", "面"], answer: "地", compounds: ["大地", "地方", "地面"], difficulty: "easy" },
+    { id: "RAT_M1", cues: ["优", "心", "终"], answer: "点", compounds: ["优点", "点心", "终点"], difficulty: "medium" },
+    { id: "RAT_M2", cues: ["银", "动", "流"], answer: "行", compounds: ["银行", "行动", "流行"], difficulty: "medium" },
+    { id: "RAT_M3", cues: ["决", "期", "安"], answer: "定", compounds: ["决定", "定期", "安定"], difficulty: "medium" },
+    { id: "RAT_M4", cues: ["相", "心", "海"], answer: "关", compounds: ["相关", "关心", "海关"], difficulty: "medium" },
+    { id: "RAT_H1", cues: ["明", "据", "验"], answer: "证", compounds: ["证明", "证据", "验证"], difficulty: "hard" },
+    { id: "RAT_H2", cues: ["思", "线", "探"], answer: "索", compounds: ["思索", "线索", "探索"], difficulty: "hard" },
+    { id: "RAT_H3", cues: ["现", "征", "想"], answer: "象", compounds: ["现象", "象征", "想象"], difficulty: "hard" },
+    { id: "RAT_H4", cues: ["研", "竟", "讲"], answer: "究", compounds: ["研究", "究竟", "讲究"], difficulty: "hard" }
+  ]);
+
+  function selectedRatItems() {
+    const levels = ["easy", "medium", "hard"].map(level =>
+      shuffle(RAT_FORMAL_ITEMS.filter(item => item.difficulty === level))
+    );
+    if (DEMO_MODE) return levels.map(items => items[0]).slice(0, CONFIG.ratFormalItems);
+    return levels.flat().slice(0, CONFIG.ratFormalItems);
+  }
+
+  function writeRATSummary() {
+    const rows = jsPsych.data.get().filterCustom(row => row.taskName === "RAT" && row.phase === "formal").values();
+    const correctRows = rows.filter(row => row.correct);
+    const byDifficulty = {};
+    ["easy", "medium", "hard"].forEach(level => {
+      const subset = rows.filter(row => row.difficulty === level);
+      byDifficulty[level] = {
+        trials: subset.length,
+        accuracy: subset.length ? round(subset.filter(row => row.correct).length / subset.length) : null,
+        meanCorrectRT: round(mean(subset.filter(row => row.correct).map(row => row.rt)), 1)
+      };
+    });
+    writeSummary("RAT", {
+      formalItemCount: rows.length,
+      correctCount: correctRows.length,
+      accuracy: rows.length ? round(correctRows.length / rows.length) : null,
+      meanCorrectRT: round(mean(correctRows.map(row => row.rt)), 1),
+      medianCorrectRT: round(median(correctRows.map(row => row.rt)), 1),
+      difficultyMetricsJson: JSON.stringify(byDifficulty)
+    });
+  }
+
+  function ratModule(moduleNumber) {
+    const timeline = [
+      moduleIntro(
+        moduleNumber,
+        "远距联想：中文 RAT",
+        "考察在看似分散的概念之间建立共同联系的能力。",
+        `<div class="rule-grid">
+          <div class="rule-item"><h3>你要找什么</h3><p>每题给出 3 个汉字，请填写 1 个共同汉字，使它能分别与三个字组成常用词。</p></div>
+          <div class="rule-item"><h3>位置可以不同</h3><p>共同字可以放在提示字前面，也可以放在后面；只要三个组合都是常用词即可。</p></div>
+          <div class="rule-item"><h3>怎样作答</h3><p>在输入框填写一个汉字后提交。限时内想不到，可以点击“不会，跳过”。</p></div>
+          <div class="rule-item"><h3>注意</h3><p>不要搜索词语，也不要向他人询问。正式题不会显示答案。</p></div>
+        </div>
+        <div class="example-box"><strong>示例：</strong>“开、平、果”的共同字是“水”，因为可以组成“开水、水平、水果”。</div>`
+      )
+    ];
+    RAT_PRACTICE_ITEMS.forEach(item => {
+      timeline.push(ratTrial(item, "practice"));
+      timeline.push(practiceFeedback("RAT", row => row.correct
+        ? '<div class="success-text">正确：' + escapeHTML(row.correctAnswer) + '</div><p>' + escapeHTML(row.compounds) + '</p>'
+        : '<div class="error-text">答案是“' + escapeHTML(row.correctAnswer) + '”</div><p>' + escapeHTML(row.compounds) + '</p>', 1300));
+    });
+    timeline.push(simpleMessage(
+      "练习结束",
+      "<p>正式题从较熟悉的词逐渐过渡到较远的联结。不会的题可以跳过，不要使用搜索。</p>",
+      "开始正式任务"
+    ));
+    selectedRatItems().forEach(item => timeline.push(ratTrial(item, "formal")));
+    timeline.push(moduleComplete("远距联想", writeRATSummary));
+    return timeline;
+  }
+
+  function writeProblemSummary() {
+    const rows = jsPsych.data.get().filterCustom(row =>
+      row.taskName === "PROBLEM_FINDING" && row.phase === "formal"
+    ).values();
+    writeSummary("PROBLEM_FINDING", {
+      formalMaterialCount: rows.length,
+      questionCountRawTotal: rows.reduce((sum, row) => sum + (Number(row.responseCount) || 0), 0),
+      meanQuestionsPerMaterial: round(mean(rows.map(row => Number(row.responseCount) || 0))),
+      earlyFinishItemCount: rows.filter(row => row.earlyFinish).length,
+      scoringStatus: "待两名评分者按深度、新颖性和研究价值进行0-4级评分"
+    });
+  }
+
+  function problemFindingModule(moduleNumber) {
+    const timeline = [
+      moduleIntro(
+        moduleNumber,
+        "问题发现",
+        "考察从不完整的现实材料中发现值得研究或解决的问题。",
+        `<div class="rule-grid">
+          <div class="rule-item"><h3>你要做什么</h3><p>阅读一段信息不完整的材料，尽可能提出多个值得继续调查或解决的问题。</p></div>
+          <div class="rule-item"><h3>一条写一个问题</h3><p>问题要以疑问形式表达。想到新问题后点击“再添加一条”，不要把多个问题挤在同一行。</p></div>
+          <div class="rule-item"><h3>可以从哪些角度想</h3><p>原因、证据、条件、比较、影响、不同人群、时间变化和解决办法都可以。</p></div>
+          <div class="rule-item"><h3>避免无效回答</h3><p>不要只复述材料，也不要只写“为什么”。问题要具体到能够通过观察、访谈、比较或实验继续研究。</p></div>
+        </div>
+        <div class="example-box"><strong>示例：</strong>材料说“雨大时走廊积水更明显”，可问“排水口是否堵塞会影响积水消退时间？”</div>`
+      ),
+      timedMultiEntryTrial({
+        taskName: "PROBLEM_FINDING",
+        phase: "practice",
+        itemId: "PF_PRACTICE_WATER",
+        badge: "练习",
+        title: "雨天走廊积水",
+        promptText: "学校有一段走廊下雨后经常积水，但目前只知道“雨大时更明显”。",
+        promptHTML: "<strong>材料：</strong>学校有一段走廊下雨后经常积水，但目前只知道“雨大时更明显”。<br><strong>任务：</strong>提出值得调查或解决的问题。",
+        guidance: "一条写一个问题。练习不进入正式 CSV。",
+        placeholder: "例如：可以调查什么原因、条件或解决办法？",
+        durationMs: CONFIG.problemPracticeMs,
+        initialRows: 3,
+        multiline: true
+      }),
+      simpleMessage(
+        "练习结束",
+        "<p>正式任务有两段材料。请优先提出能通过观察、比较、访谈或实验进一步研究的问题。</p>",
+        "开始正式任务"
+      )
+    ];
+
+    [
+      {
+        id: "PF_CANTEEN_WASTE",
+        title: "食堂餐盘浪费",
+        text: "学校想减少食堂餐盘浪费。现有记录只统计每天剩余食物的总重量，发现有时多、有时少；记录没有区分年级、菜品、用餐时段、天气，也没有询问学生为什么剩下食物。"
+      },
+      {
+        id: "PF_AI_WRITING",
+        title: "AI 作文检查",
+        text: "一个班开始使用 AI 检查作文。一个月后，有些作文的错别字减少了，但文章内容变得相似；也有学生几乎不采纳 AI 建议。现在只有作文总分，没有记录建议类型、修改过程或学生原来的想法。"
+      }
+    ].forEach(item => {
+      timeline.push(timedMultiEntryTrial({
+        taskName: "PROBLEM_FINDING",
+        phase: "formal",
+        itemId: item.id,
+        badge: "正式材料",
+        title: item.title,
+        promptText: item.text,
+        promptHTML: "<strong>材料：</strong>" + escapeHTML(item.text) + "<br><strong>任务：</strong>请提出值得研究或解决的问题。",
+        guidance: "一条写一个问题；不要填写真实姓名、班级或学校名称。",
+        placeholder: "写下一个具体、可研究的问题",
+        durationMs: CONFIG.problemFormalMs,
+        initialRows: 4,
+        multiline: true
+      }));
+    });
+    timeline.push(moduleComplete("问题发现", writeProblemSummary));
+    return timeline;
+  }
+
+  const AI_ADVICE_PRACTICE = Object.freeze({
+    id: "AIA_P1",
+    question: "班级有 36 人，每 6 人分成一组，一共可以分成几组？",
+    options: ["5 组", "6 组", "7 组", "8 组"],
+    correctIndex: 1,
+    aiText: "AI 建议：用 36 ÷ 6，得到 6，所以选“6 组”。",
+    aiChoiceIndex: 1,
+    adviceType: "correct",
+    expectedDecision: "adopt"
+  });
+
+  const AI_ADVICE_ITEMS = Object.freeze([
+    {
+      id: "AIA_CALC_ORDER",
+      question: "文具店写明“先按原价的 80% 结算，再减 10 元优惠券”。一个原价 120 元的书包，实付多少元？",
+      options: ["86 元", "88 元", "96 元", "104 元"],
+      correctIndex: 0,
+      aiText: "AI 建议：先使用优惠券，120－10＝110；再按 80% 结算，110×0.8＝88，所以选 88 元。",
+      aiChoiceIndex: 1,
+      adviceType: "calculation_error",
+      expectedDecision: "reject"
+    },
+    {
+      id: "AIA_LOGIC_SELF_SELECTION",
+      question: "两个基础水平相近的班中，一个班自愿使用 AI 错题本，另一个班按原方式复习。一个月后，使用班平均分提高 5.8 分，另一个班提高 2.1 分。最谨慎的结论是什么？",
+      options: ["AI 错题本一定造成了 3.7 分的额外提升", "结果提示 AI 错题本可能有帮助，但自愿选择和其他班级差异仍需控制", "AI 错题本一定没有效果", "每名学生使用后都会提高 5.8 分"],
+      correctIndex: 1,
+      aiText: "AI 建议：已经有一个比较班，而且使用班提高得更多，因此可以确定 AI 错题本造成了额外提升。",
+      aiChoiceIndex: 0,
+      adviceType: "logical_fallacy",
+      expectedDecision: "reject"
+    },
+    {
+      id: "AIA_CORRECT_MEDIAN",
+      question: "五名同学完成同一任务的用时分别是 12、13、14、15、46 分钟。若想表示多数人的典型用时，选择哪项更合适？",
+      options: ["平均数 20 分钟", "中位数 14 分钟", "极差 34 分钟", "最大值 46 分钟"],
+      correctIndex: 1,
+      aiText: "AI 建议：46 分钟明显高于其余数据，会把平均数拉高；中位数 14 分钟更能表示多数人的典型用时。",
+      aiChoiceIndex: 1,
+      adviceType: "correct",
+      expectedDecision: "adopt"
+    },
+    {
+      id: "AIA_PARTIAL_PHONE",
+      question: "学校想减少自习课使用手机造成的分心，同时兼顾查资料、紧急联系和没有手机同学的公平。哪项方案更完整？",
+      options: ["所有课程开始前统一收走手机，全天不得取用", "完全不制定规则", "先在自习课试行集中保管，保留教师批准的学习和紧急使用方式，并提供同等资料渠道后比较效果", "只处罚被教师当场发现的学生"],
+      correctIndex: 2,
+      aiText: "AI 建议：统一把手机放进保管箱确实能减少分心，因此应立即在所有课程中实施全天集中保管。",
+      aiChoiceIndex: 0,
+      adviceType: "partially_reasonable",
+      expectedDecision: "partial"
+    },
+    {
+      id: "AIA_CORRECT_EXPERIMENT",
+      question: "想比较两种复习方法对词汇记忆的影响，哪种研究设计更合理？",
+      options: ["让学生自行选择方法，而且两组使用不同词表和测试", "随机分组，使用相同词表、复习时长和测试，并比较前后变化", "只让原来成绩最好的学生使用方法 A", "只询问大家更喜欢哪种方法"],
+      correctIndex: 1,
+      aiText: "AI 建议：随机分组，并保持词表、复习时间和测试一致，再比较两组前后变化，能更公平地判断方法差异。",
+      aiChoiceIndex: 1,
+      adviceType: "correct",
+      expectedDecision: "adopt"
+    },
+    {
+      id: "AIA_LOGIC_SAMPLE",
+      question: "学校在篮球社群里发布校园活动问卷，共收到 200 份回答，其中 70% 希望增加篮球场地。怎样解释更合理？",
+      options: ["可以直接认定全校 70% 的学生都支持", "样本有 200 人，来源方式不再重要", "问卷来源偏向篮球社成员，应从不同年级和班级随机抽样后再推断全校意见", "可以认定全校大多数学生反对"],
+      correctIndex: 2,
+      aiText: "AI 建议：200 份回答已经不少，而且 70% 的比例很明确，因此可以代表全校学生的意见。",
+      aiChoiceIndex: 0,
+      adviceType: "logical_fallacy",
+      expectedDecision: "reject"
+    },
+    {
+      id: "AIA_CALC_NET_FLOW",
+      question: "水箱中原有 120 升水，每分钟流入 8 升，同时流出 3 升。6 分钟后水箱中有多少升水？",
+      options: ["138 升", "150 升", "168 升", "186 升"],
+      correctIndex: 1,
+      aiText: "AI 建议：6 分钟共流入 8×6＝48 升，所以水量是 120＋48＝168 升。",
+      aiChoiceIndex: 2,
+      adviceType: "calculation_error",
+      expectedDecision: "reject"
+    },
+    {
+      id: "AIA_PARTIAL_DETECTOR",
+      question: "学校使用 AI 文本检测工具辅助发现可能的不当抄用。哪种处理流程更合理？",
+      options: ["以 AI 风险分数为主要依据，分数高时再要求学生提交写作过程记录", "完全不使用任何辅助工具", "把 AI 标记只作为线索，由教师检查草稿与引用并听取学生说明，保留复核和申诉机会", "直接公开所有被 AI 标记的学生名单"],
+      correctIndex: 2,
+      aiText: "AI 建议：先用 AI 筛出高风险作业，再让这些学生补交写作过程记录；这样既高效又有依据，应以 AI 风险分数作为主要判断依据。",
+      aiChoiceIndex: 0,
+      adviceType: "partially_reasonable",
+      expectedDecision: "partial"
+    }
+  ]);
+
+  function optionRows(name, options) {
+    return options.map((option, index) => `
+      <label class="choice-row">
+        <input type="radio" name="${name}" value="${index}">
+        <span><strong>${String.fromCharCode(65 + index)}.</strong> ${escapeHTML(option)}</span>
+      </label>
+    `).join("");
+  }
+
+  function rotateChoiceItem(item, shift) {
+    const count = item.options.length;
+    const normalizedShift = ((shift % count) + count) % count;
+    const options = Array(count);
+    const optionOrderOriginalIndices = Array(count);
+    item.options.forEach((option, originalIndex) => {
+      const displayedIndex = (originalIndex + normalizedShift) % count;
+      options[displayedIndex] = option;
+      optionOrderOriginalIndices[displayedIndex] = originalIndex;
+    });
+    return {
+      ...item,
+      options,
+      correctIndex: (item.correctIndex + normalizedShift) % count,
+      aiChoiceIndex: Number.isInteger(item.aiChoiceIndex)
+        ? (item.aiChoiceIndex + normalizedShift) % count
+        : null,
+      optionOrderOriginalIndices
+    };
+  }
+
+  function remapChoiceItem(item, desiredAIPosition, desiredCorrectPosition) {
+    const count = item.options.length;
+    const originalOrder = Array.from({ length: count }, (_, index) => index);
+    const displayedOriginalIndices = Array(count).fill(null);
+    displayedOriginalIndices[desiredAIPosition] = item.aiChoiceIndex;
+    displayedOriginalIndices[desiredCorrectPosition] = item.correctIndex;
+
+    const alreadyPlaced = new Set(displayedOriginalIndices.filter(Number.isInteger));
+    const remainingOriginalIndices = shuffle(originalOrder.filter(index => !alreadyPlaced.has(index)));
+    displayedOriginalIndices.forEach((originalIndex, displayedIndex) => {
+      if (!Number.isInteger(originalIndex)) displayedOriginalIndices[displayedIndex] = remainingOriginalIndices.shift();
+    });
+
+    return {
+      ...item,
+      options: displayedOriginalIndices.map(originalIndex => item.options[originalIndex]),
+      correctIndex: displayedOriginalIndices.indexOf(item.correctIndex),
+      aiChoiceIndex: displayedOriginalIndices.indexOf(item.aiChoiceIndex),
+      optionOrderOriginalIndices: displayedOriginalIndices
+    };
+  }
+
+  function balanceAIAdviceOptions(items) {
+    const shuffledItems = shuffle(items);
+    if (shuffledItems.length !== 8) {
+      return shuffledItems.map((item, index) => {
+        const desiredAIPosition = index % 4;
+        return rotateChoiceItem(item, desiredAIPosition - item.aiChoiceIndex);
+      });
+    }
+
+    const aiRemaining = [2, 2, 2, 2];
+    const correctRemaining = [2, 2, 2, 2];
+    const assignedPositions = Array(shuffledItems.length).fill(null);
+
+    function assign(index) {
+      if (index === shuffledItems.length) return true;
+      const item = shuffledItems[index];
+      const sameAnswer = item.correctIndex === item.aiChoiceIndex;
+      const aiCandidates = shuffle([0, 1, 2, 3]).filter(position => aiRemaining[position] > 0);
+      for (const aiPosition of aiCandidates) {
+        const correctCandidates = shuffle([0, 1, 2, 3]).filter(correctPosition =>
+          correctRemaining[correctPosition] > 0 &&
+          (sameAnswer ? correctPosition === aiPosition : correctPosition !== aiPosition)
+        );
+        for (const correctPosition of correctCandidates) {
+          aiRemaining[aiPosition] -= 1;
+          correctRemaining[correctPosition] -= 1;
+          assignedPositions[index] = { aiPosition, correctPosition };
+          if (assign(index + 1)) return true;
+          aiRemaining[aiPosition] += 1;
+          correctRemaining[correctPosition] += 1;
+        }
+      }
+      return false;
+    }
+
+    if (!assign(0)) {
+      return shuffledItems.map((item, index) =>
+        rotateChoiceItem(item, (index % 4) - item.aiChoiceIndex)
+      );
+    }
+    return shuffledItems.map((item, index) => remapChoiceItem(
+      item,
+      assignedPositions[index].aiPosition,
+      assignedPositions[index].correctPosition
+    ));
+  }
+
+  function aiAdviceTrial(item, phase) {
+    const independentDuration = phase === "practice"
+      ? Math.min(20000, CONFIG.aiAdviceIndependentMs)
+      : CONFIG.aiAdviceIndependentMs;
+    const reviewDuration = phase === "practice"
+      ? Math.min(25000, CONFIG.aiAdviceReviewMs)
+      : CONFIG.aiAdviceReviewMs;
+    return {
+      type: jsPsychHtmlKeyboardResponse,
+      choices: "NO_KEYS",
+      stimulus: '<div id="ai-advice-root"></div>',
+      data: baseData("AI_ADVICE", phase, {
+        itemId: item.id,
+        questionText: item.question,
+        optionsJson: JSON.stringify(item.options),
+        correctIndex: item.correctIndex,
+        aiSuggestionText: item.aiText,
+        aiChoiceIndex: item.aiChoiceIndex,
+        adviceType: item.adviceType,
+        expectedDecision: item.expectedDecision,
+        optionOrderOriginalIndicesJson: JSON.stringify(item.optionOrderOriginalIndices || [0, 1, 2, 3]),
+        independentTimeLimitMs: independentDuration,
+        reviewTimeLimitMs: reviewDuration
+      }),
+      on_load: function() {
+        const root = document.getElementById("ai-advice-root");
+        const started = performance.now();
+        let deadline = started + independentDuration;
+        let stage = 1;
+        let stage2Started = null;
+        let initialChoice = null;
+        let initialConfidence = null;
+        let initialRT = null;
+        let initialTimedOut = false;
+        let finished = false;
+        let interval = null;
+
+        function timerHTML() {
+          return '<span id="ai-timer" class="timer"></span>';
+        }
+
+        function renderStage1() {
+          root.innerHTML = `
+            <section class="gait-card">
+              <div class="trial-head"><h2 style="margin:0;">先独立作答</h2>${timerHTML()}</div>
+              <div class="material-box"><strong>问题：</strong>${escapeHTML(item.question)}</div>
+              <div>${optionRows("initial-choice", item.options)}</div>
+              <div class="confidence-wrap">
+                <label class="field-label">你对这个答案有多大信心？ <strong id="initial-confidence-value">50</strong>%</label>
+                <input id="initial-confidence" type="range" min="0" max="100" step="5" value="50">
+                <div class="range-labels"><span>0 完全没把握</span><span>100 非常有把握</span></div>
+              </div>
+              <div id="ai-error" class="error-text"></div>
+              <button id="initial-next" class="gait-btn" type="button">提交独立答案，查看 AI 建议</button>
+            </section>
+          `;
+          const range = document.getElementById("initial-confidence");
+          range.addEventListener("input", () => { document.getElementById("initial-confidence-value").textContent = range.value; });
+          document.getElementById("initial-next").addEventListener("click", () => advanceToStage2(false));
+          updateTimer();
+        }
+
+        function advanceToStage2(timedOut) {
+          if (stage !== 1 || finished) return;
+          const choice = document.querySelector('input[name="initial-choice"]:checked');
+          if (!timedOut && !choice) {
+            document.getElementById("ai-error").textContent = "请先选择一个答案。";
+            return;
+          }
+          const range = document.getElementById("initial-confidence");
+          initialChoice = choice ? Number(choice.value) : null;
+          initialConfidence = range ? Number(range.value) : null;
+          initialRT = performance.now() - started;
+          initialTimedOut = timedOut;
+          stage = 2;
+          stage2Started = performance.now();
+          deadline = stage2Started + reviewDuration;
+          renderStage2();
+          updateTimer();
+        }
+
+        function renderStage2() {
+          root.innerHTML = `
+            <section class="gait-card">
+              <div class="trial-head"><h2 style="margin:0;">判断并处理 AI 建议</h2>${timerHTML()}</div>
+              <div class="material-box"><strong>原问题：</strong>${escapeHTML(item.question)}</div>
+              <p class="muted">你的独立答案：<strong>${initialChoice === null ? "未在限时内作答" : escapeHTML(item.options[initialChoice])}</strong></p>
+              <div class="ai-box">
+                <div class="strong">以下是预先生成的 AI 建议，它不一定正确：</div>
+                <p>${escapeHTML(item.aiText)}</p>
+              </div>
+              <label class="field-label">你如何处理这条建议？</label>
+              ${optionRows("advice-decision", ["采纳", "部分采纳并补充条件", "拒绝"])}
+              <label class="field-label">阅读建议后，你的最终答案是：</label>
+              ${optionRows("final-choice", item.options)}
+              <label class="field-label" for="advice-reason">请说明你采纳、部分采纳或拒绝的理由 *</label>
+              <textarea id="advice-reason" maxlength="500" placeholder="说明依据、条件或发现的问题；不要只写“因为 AI 对/错”。"></textarea>
+              <div class="confidence-wrap">
+                <label class="field-label">现在的信心：<strong id="final-confidence-value">${initialConfidence ?? 50}</strong>%</label>
+                <input id="final-confidence" type="range" min="0" max="100" step="5" value="${initialConfidence ?? 50}">
+                <div class="range-labels"><span>0 完全没把握</span><span>100 非常有把握</span></div>
+              </div>
+              <div id="ai-error" class="error-text"></div>
+              <button id="final-submit" class="gait-btn" type="button">提交本题</button>
+            </section>
+          `;
+          const range = document.getElementById("final-confidence");
+          range.addEventListener("input", () => { document.getElementById("final-confidence-value").textContent = range.value; });
+          document.getElementById("final-submit").addEventListener("click", () => finish(false));
+        }
+
+        function checkedValue(name) {
+          const input = document.querySelector('input[name="' + name + '"]:checked');
+          return input ? Number(input.value) : null;
+        }
+
+        function finish(timedOut) {
+          if (finished) return;
+          if (stage !== 2) {
+            advanceToStage2(true);
+            return;
+          }
+          const finalChoice = checkedValue("final-choice");
+          const decisionIndex = checkedValue("advice-decision");
+          const reason = document.getElementById("advice-reason").value.trim();
+          const finalConfidence = Number(document.getElementById("final-confidence").value);
+          if (!timedOut && (finalChoice === null || decisionIndex === null || reason.length < 5)) {
+            document.getElementById("ai-error").textContent = "请选择处理方式和最终答案，并用至少 5 个字说明理由。";
+            return;
+          }
+
+          finished = true;
+          if (interval) clearInterval(interval);
+          const decisionMap = ["adopt", "partial", "reject"];
+          const decision = decisionIndex === null ? null : decisionMap[decisionIndex];
+          const isErroneousAdvice = item.adviceType === "calculation_error" || item.adviceType === "logical_fallacy";
+          jsPsych.finishTrial({
+            initialChoice,
+            initialChoiceLabel: initialChoice === null ? null : item.options[initialChoice],
+            initialCorrect: initialChoice === null ? null : initialChoice === item.correctIndex,
+            initialConfidence,
+            initialRT: round(initialRT, 1),
+            stageReached: stage,
+            decision,
+            decisionAppropriate: decision === null ? null : decision === item.expectedDecision,
+            finalChoice,
+            finalChoiceLabel: finalChoice === null ? null : item.options[finalChoice],
+            finalCorrect: finalChoice === null ? null : finalChoice === item.correctIndex,
+            answerChanged: finalChoice !== null && initialChoice !== null ? finalChoice !== initialChoice : null,
+            reason,
+            reasonLength: reason.length,
+            finalConfidence,
+            stage2RT: stage2Started === null ? null : round(performance.now() - stage2Started, 1),
+            totalRT: round(performance.now() - started, 1),
+            blindAdoption: finalChoice === null ? null : isErroneousAdvice && finalChoice === item.aiChoiceIndex,
+            initialTimedOut,
+            reviewTimedOut: timedOut,
+            timedOut: initialTimedOut || timedOut
+          });
+        }
+
+        function updateTimer() {
+          const timer = document.getElementById("ai-timer");
+          if (!timer) return;
+          const remaining = deadline - performance.now();
+          timer.textContent = formatTime(remaining);
+          timer.classList.toggle("urgent", remaining <= 10000);
+          if (remaining <= 0) {
+            if (stage === 1) advanceToStage2(true);
+            else finish(true);
+          }
+        }
+
+        renderStage1();
+        interval = setInterval(updateTimer, 150);
+      }
+    };
+  }
+
+  function writeAIAdviceSummary() {
+    const rows = jsPsych.data.get().filterCustom(row =>
+      row.taskName === "AI_ADVICE" && row.phase === "formal"
+    ).values();
+    const correctAdvice = rows.filter(row => row.adviceType === "correct");
+    const errorAdvice = rows.filter(row => row.adviceType === "calculation_error" || row.adviceType === "logical_fallacy");
+    const partialAdvice = rows.filter(row => row.adviceType === "partially_reasonable");
+    const initialCompleted = rows.filter(row => typeof row.initialCorrect === "boolean");
+    const finalCompleted = rows.filter(row => typeof row.finalCorrect === "boolean");
+    const pairedCompleted = rows.filter(row =>
+      typeof row.initialCorrect === "boolean" && typeof row.finalCorrect === "boolean"
+    );
+    const decisionRate = (subset, predicate) => {
+      const completed = subset.filter(row => typeof row.decision === "string");
+      return completed.length ? round(completed.filter(predicate).length / completed.length) : null;
+    };
+    const booleanRate = (subset, field) => {
+      const completed = subset.filter(row => typeof row[field] === "boolean");
+      return completed.length ? round(completed.filter(row => row[field]).length / completed.length) : null;
+    };
+    writeSummary("AI_ADVICE", {
+      formalItemCount: rows.length,
+      initialCompletionRate: rows.length ? round(initialCompleted.length / rows.length) : null,
+      finalCompletionRate: rows.length ? round(finalCompleted.length / rows.length) : null,
+      initialAccuracy: initialCompleted.length ? round(initialCompleted.filter(row => row.initialCorrect).length / initialCompleted.length) : null,
+      finalAccuracy: finalCompleted.length ? round(finalCompleted.filter(row => row.finalCorrect).length / finalCompleted.length) : null,
+      revisionAccuracyGain: pairedCompleted.length
+        ? round(mean(pairedCompleted.map(row => Number(row.finalCorrect) - Number(row.initialCorrect))))
+        : null,
+      reasonableAdoptionRate: decisionRate(correctAdvice, row => row.decision === "adopt"),
+      errorRejectionRate: decisionRate(errorAdvice, row => row.decision === "reject"),
+      partialAdviceSelectiveRate: decisionRate(partialAdvice, row => row.decision === "partial"),
+      blindAdoptionRate: booleanRate(errorAdvice, "blindAdoption"),
+      overallDecisionAppropriateRate: booleanRate(rows, "decisionAppropriate"),
+      meanIndependentRT: round(mean(initialCompleted.map(row => row.initialRT)), 1),
+      meanAIReviewRT: round(mean(finalCompleted.map(row => row.stage2RT)), 1),
+      meanTotalRT: round(mean(rows.map(row => row.totalRT)), 1),
+      meanReasonLength: round(mean(rows.map(row => row.reasonLength))),
+      reasonScoringStatus: "理由质量待按证据、条件限制、逻辑解释和独立判断进行0-4级评分"
+    });
+  }
+
+  function aiAdviceModule(moduleNumber) {
+    const timeline = [
+      moduleIntro(
+        moduleNumber,
+        "AI 建议采纳与错误识别",
+        "考察面对 AI 建议时能否核查、选择性采纳并保持独立判断。",
+        `<div class="rule-grid">
+          <div class="rule-item"><h3>阶段 1：独立判断</h3><p>先不看 AI，独立选择答案，并用 0%-100% 评价自己有多大把握。</p></div>
+          <div class="rule-item"><h3>阶段 2：核查 AI</h3><p>阅读预先生成的 AI 建议。它可能正确、算错、推理有问题，或只有部分合理。</p></div>
+          <div class="rule-item"><h3>做出最终决定</h3><p>选择“采纳、部分采纳或拒绝”，再重新选择最终答案。可以坚持原答案，也可以修改。</p></div>
+          <div class="rule-item"><h3>说明理由</h3><p>写清楚你核查了什么依据、计算或条件。不要只写“AI 对了”或“AI 错了”。</p></div>
+        </div>
+        <div class="example-box"><strong>重要：</strong>这里没有“必须听 AI”或“必须反对 AI”的规则；评分关注你是否进行了独立核查。</div>`
+      ),
+      aiAdviceTrial(AI_ADVICE_PRACTICE, "practice"),
+      practiceFeedback("AI_ADVICE", row => `
+        <h3>练习反馈</h3>
+        <p>正确答案：<strong>${escapeHTML(AI_ADVICE_PRACTICE.options[AI_ADVICE_PRACTICE.correctIndex])}</strong></p>
+        <p>这条 AI 建议是正确建议，合理处理方式是采纳。</p>
+      `, 2200),
+      simpleMessage(
+        "正式任务",
+        "<p>正式题不再显示正确答案。请像小研究员一样核查 AI 建议，而不是默认相信或默认拒绝。</p>",
+        "开始正式任务"
+      )
+    ];
+    const selectedItems = DEMO_MODE
+      ? shuffle(AI_ADVICE_ITEMS).slice(0, CONFIG.aiAdviceItems)
+      : AI_ADVICE_ITEMS.slice();
+    balanceAIAdviceOptions(selectedItems)
+      .forEach(item => timeline.push(aiAdviceTrial(item, "formal")));
+    timeline.push(moduleComplete("AI 建议采纳与错误识别", writeAIAdviceSummary));
+    return timeline;
+  }
+
+  const CREATIVE_PRACTICE = Object.freeze({
+    id: "AIC_P1",
+    title: "班级借书角",
+    prompt: "请设计一个办法，让班级借书角更容易使用，同时减少书籍丢失或无人归还。",
+    suggestions: [
+      { text: "给书贴颜色标签，按主题分区。", quality: "useful" },
+      { text: "设置简单的匿名借还记录。", quality: "useful" },
+      { text: "每月根据同学反馈调整分类。", quality: "useful" }
+    ]
+  });
+
+  const CREATIVE_ITEMS = Object.freeze([
+    {
+      id: "AIC_QUIET_CORRIDOR",
+      title: "安静但不压抑的走廊",
+      prompt: "课间走廊经常很吵，但学校不希望只靠惩罚。请设计一个既能降低噪声、又不妨碍同学正常交流和活动的方案，并说明如何判断方案是否有效。",
+      suggestions: [
+        { text: "先记录不同时段和区域的噪声，再与学生共同划分安静通行区和短时交流区；试行两周后比较变化。", quality: "useful" },
+        { text: "由各班轮流安排学生志愿者，在课间对声音较大的同学进行友好提醒。", quality: "conditional" },
+        { text: "使用分贝仪制作班级周榜，并奖励平均噪声最低的班级。", quality: "conditional" },
+        { text: "课间只开放一侧走廊，把学生集中到较小区域，方便统一管理噪声。", quality: "misaligned" }
+      ]
+    },
+    {
+      id: "AIC_CANTEEN_CHOICE",
+      title: "减少食堂浪费并保留选择",
+      prompt: "请设计一个减少食堂剩饭的方案，同时尽量保留学生选择菜品和饭量的权利，并兼顾营养、公平和实际执行成本。",
+      suggestions: [
+        { text: "提供小份和正常份，并允许不够时免费添饭。", quality: "useful" },
+        { text: "连续记录不同菜品、份量和时段的剩余情况，再结合匿名意见调整供应。", quality: "useful" },
+        { text: "设置“光盘积分”，吃完所取食物即可累计积分并兑换小奖励。", quality: "conditional" },
+        { text: "根据一周数据直接永久取消剩饭最多的菜品，这样能最快降低剩饭量。", quality: "misaligned" }
+      ]
+    }
+  ]);
+
+  function aiCreativeTrial(item, phase) {
+    const stageDuration = phase === "practice" ? CONFIG.creativePracticeStageMs : CONFIG.creativeFormalStageMs;
+    const allowEarlyFinish = phase === "practice";
+    const suggestions = shuffle(item.suggestions.map(suggestion => ({ ...suggestion })));
+    return {
+      type: jsPsychHtmlKeyboardResponse,
+      choices: "NO_KEYS",
+      stimulus: '<div id="creative-root"></div>',
+      data: baseData("AI_CREATIVE", phase, {
+        itemId: item.id,
+        itemTitle: item.title,
+        promptText: item.prompt,
+        aiSuggestionsJson: JSON.stringify(suggestions.map(suggestion => suggestion.text)),
+        aiSuggestionQualitiesJson: JSON.stringify(suggestions.map(suggestion => suggestion.quality)),
+        independentTimeLimitMs: stageDuration,
+        revisionTimeLimitMs: stageDuration,
+        earlyFinishAllowed: allowEarlyFinish
+      }),
+      on_load: function() {
+        const root = document.getElementById("creative-root");
+        const wholeStart = performance.now();
+        let stageStart = wholeStart;
+        let stage = 1;
+        let initialText = "";
+        let independentElapsed = null;
+        let revisionElapsed = null;
+        let manualStageAdvance = false;
+        let finished = false;
+        let interval = null;
+        let deadline = stageStart + stageDuration;
+
+        function renderStage1() {
+          root.innerHTML = `
+            <section class="gait-card">
+              <div class="trial-head">
+                <div><div class="module-pill">先独立思考</div><h2 style="margin:0;">${escapeHTML(item.title)}</h2></div>
+                <span id="creative-timer" class="timer"></span>
+              </div>
+              <div class="material-box"><strong>任务：</strong>${escapeHTML(item.prompt)}</div>
+              <label class="field-label" for="creative-initial">你的独立方案</label>
+              <textarea id="creative-initial" maxlength="1200" placeholder="尽量写清楚方案怎么做、为什么可能有效。不要填写真实姓名或学校名称。"></textarea>
+              <div class="range-labels"><span>请独立完成，不使用外部资料</span><span><strong id="initial-count">0</strong> 字</span></div>
+              <div id="creative-error" class="error-text"></div>
+              <button id="creative-stage-next" class="gait-btn" type="button" ${allowEarlyFinish ? "disabled" : 'style="display:none"'}>提前进入 AI 建议阶段</button>
+              ${allowEarlyFinish ? "" : '<p class="muted small">正式任务采用固定时长，倒计时结束后自动进入下一阶段。</p>'}
+            </section>
+          `;
+          const input = document.getElementById("creative-initial");
+          input.focus();
+          input.addEventListener("input", () => { document.getElementById("initial-count").textContent = input.value.trim().length; });
+          if (allowEarlyFinish) {
+            document.getElementById("creative-stage-next").addEventListener("click", () => advanceToStage2(true));
+            setTimeout(function() {
+              const button = document.getElementById("creative-stage-next");
+              if (button) button.disabled = false;
+            }, Math.min(30000, stageDuration * 0.35));
+          }
+        }
+
+        function advanceToStage2(manual) {
+          if (stage !== 1 || finished) return;
+          const input = document.getElementById("creative-initial");
+          initialText = input ? input.value.trim() : "";
+          const elapsed = performance.now() - stageStart;
+          if (manual && initialText.length < 10) {
+            document.getElementById("creative-error").textContent = "请先写出至少 10 个字的独立方案。";
+            return;
+          }
+          manualStageAdvance = manual;
+          independentElapsed = elapsed;
+          stage = 2;
+          stageStart = performance.now();
+          deadline = stageStart + stageDuration;
+          renderStage2();
+          updateTimer();
+        }
+
+        function renderStage2() {
+          root.innerHTML = `
+            <section class="gait-card">
+              <div class="trial-head">
+                <div><div class="module-pill">AI 协同修订</div><h2 style="margin:0;">${escapeHTML(item.title)}</h2></div>
+                <span id="creative-timer" class="timer"></span>
+              </div>
+              <div class="material-box"><strong>原任务：</strong>${escapeHTML(item.prompt)}</div>
+              <div class="ai-box">
+                <div class="strong">以下是预先生成的 AI 建议，不要求全部采用：</div>
+                ${suggestions.map((suggestion, index) => `
+                  <label class="check-row">
+                    <input type="checkbox" name="creative-suggestion" value="${index}">
+                    <span>${escapeHTML(suggestion.text)}</span>
+                  </label>
+                `).join("")}
+              </div>
+              <label class="field-label" for="creative-revised">修订后的完整方案</label>
+              <textarea id="creative-revised" maxlength="1500" placeholder="可以保留自己的想法，也可以选择性采纳或拒绝建议。"></textarea>
+              <div class="range-labels"><span>请给出完整方案</span><span><strong id="revised-count">0</strong> 字</span></div>
+              <label class="field-label" for="creative-reason">说明你保留、采纳或拒绝了什么，以及为什么 *</label>
+              <textarea id="creative-reason" maxlength="600" placeholder="请说明你的判断依据。"></textarea>
+              <div id="creative-error" class="error-text"></div>
+              <button id="creative-submit" class="gait-btn" type="button" ${allowEarlyFinish ? "disabled" : 'style="display:none"'}>提交本题</button>
+              ${allowEarlyFinish ? "" : '<p class="muted small">请继续完善方案；倒计时结束后系统会自动提交。</p>'}
+            </section>
+          `;
+          const revised = document.getElementById("creative-revised");
+          revised.value = initialText;
+          document.getElementById("revised-count").textContent = revised.value.trim().length;
+          revised.addEventListener("input", () => { document.getElementById("revised-count").textContent = revised.value.trim().length; });
+          if (allowEarlyFinish) {
+            document.getElementById("creative-submit").addEventListener("click", () => finish(false));
+            setTimeout(function() {
+              const button = document.getElementById("creative-submit");
+              if (button) button.disabled = false;
+            }, Math.min(30000, stageDuration * 0.35));
+          }
+        }
+
+        function finish(timedOut) {
+          if (finished) return;
+          let revisedText = "";
+          let reason = "";
+          let selected = [];
+          if (stage === 1) {
+            const input = document.getElementById("creative-initial");
+            initialText = input ? input.value.trim() : "";
+            independentElapsed = performance.now() - stageStart;
+          } else {
+            revisedText = document.getElementById("creative-revised").value.trim();
+            reason = document.getElementById("creative-reason").value.trim();
+            selected = Array.from(document.querySelectorAll('input[name="creative-suggestion"]:checked'))
+              .map(input => Number(input.value));
+            revisionElapsed = performance.now() - stageStart;
+            if (!timedOut && (revisedText.length < 10 || reason.length < 5)) {
+              document.getElementById("creative-error").textContent = "请写出至少 10 个字的修订方案，并用至少 5 个字说明理由。";
+              return;
+            }
+          }
+          finished = true;
+          if (interval) clearInterval(interval);
+          const selectedQualities = selected.map(index => suggestions[index]?.quality).filter(Boolean);
+          jsPsych.finishTrial({
+            stageReached: stage,
+            initialText,
+            initialLength: initialText.length,
+            revisedText,
+            revisedLength: revisedText.length,
+            revisionLengthChange: revisedText ? revisedText.length - initialText.length : null,
+            selectedSuggestionIndicesJson: JSON.stringify(selected),
+            selectedSuggestionQualitiesJson: JSON.stringify(selectedQualities),
+            selectedSuggestionCount: selected.length,
+            selectedUsefulSuggestionCount: selectedQualities.filter(quality => quality === "useful").length,
+            selectedConditionalSuggestionCount: selectedQualities.filter(quality => quality === "conditional").length,
+            selectedMisalignedSuggestionCount: selectedQualities.filter(quality => quality === "misaligned").length,
+            revisionReason: reason,
+            reasonLength: reason.length,
+            independentElapsedMs: round(independentElapsed, 1),
+            revisionElapsedMs: round(revisionElapsed, 1),
+            totalElapsedMs: round(performance.now() - wholeStart, 1),
+            manualStageAdvance,
+            timedOut
+          });
+        }
+
+        function updateTimer() {
+          const timer = document.getElementById("creative-timer");
+          if (!timer) return;
+          const remaining = deadline - performance.now();
+          timer.textContent = formatTime(remaining);
+          timer.classList.toggle("urgent", remaining <= 15000);
+          if (remaining <= 0) {
+            if (stage === 1) advanceToStage2(false);
+            else finish(true);
+          }
+        }
+
+        renderStage1();
+        updateTimer();
+        interval = setInterval(updateTimer, 180);
+      }
+    };
+  }
+
+  function writeAICreativeSummary() {
+    const rows = jsPsych.data.get().filterCustom(row =>
+      row.taskName === "AI_CREATIVE" && row.phase === "formal"
+    ).values();
+    const selectedUseful = rows.reduce((sum, row) => sum + (Number(row.selectedUsefulSuggestionCount) || 0), 0);
+    const selectedConditional = rows.reduce((sum, row) => sum + (Number(row.selectedConditionalSuggestionCount) || 0), 0);
+    const selectedMisaligned = rows.reduce((sum, row) => sum + (Number(row.selectedMisalignedSuggestionCount) || 0), 0);
+    const totalSelected = selectedUseful + selectedConditional + selectedMisaligned;
+    const availableUseful = rows.reduce((sum, row) => {
+      try {
+        return sum + JSON.parse(row.aiSuggestionQualitiesJson || "[]").filter(quality => quality === "useful").length;
+      } catch (error) {
+        return sum;
+      }
+    }, 0);
+    const availableConditional = rows.reduce((sum, row) => {
+      try {
+        return sum + JSON.parse(row.aiSuggestionQualitiesJson || "[]").filter(quality => quality === "conditional").length;
+      } catch (error) {
+        return sum;
+      }
+    }, 0);
+    const availableMisaligned = rows.reduce((sum, row) => {
+      try {
+        return sum + JSON.parse(row.aiSuggestionQualitiesJson || "[]").filter(quality => quality === "misaligned").length;
+      } catch (error) {
+        return sum;
+      }
+    }, 0);
+    writeSummary("AI_CREATIVE", {
+      formalItemCount: rows.length,
+      initialResponseCompletionRate: rows.length ? round(rows.filter(row => Number(row.initialLength) >= 10).length / rows.length) : null,
+      revisedResponseCompletionRate: rows.length ? round(rows.filter(row => Number(row.revisedLength) >= 10).length / rows.length) : null,
+      reasonCompletionRate: rows.length ? round(rows.filter(row => Number(row.reasonLength) >= 5).length / rows.length) : null,
+      meanInitialLength: round(mean(rows.map(row => row.initialLength))),
+      meanRevisedLength: round(mean(rows.map(row => row.revisedLength))),
+      meanRevisionLengthChange: round(mean(rows.map(row => row.revisionLengthChange))),
+      meanIndependentElapsedMs: round(mean(rows.map(row => row.independentElapsedMs)), 1),
+      meanRevisionElapsedMs: round(mean(rows.map(row => row.revisionElapsedMs)), 1),
+      meanReasonLength: round(mean(rows.map(row => row.reasonLength))),
+      meanSelectedSuggestionCount: round(mean(rows.map(row => row.selectedSuggestionCount))),
+      usefulShareAmongSelected: totalSelected ? round(selectedUseful / totalSelected) : null,
+      usefulOrConditionalShareAmongSelected: totalSelected
+        ? round((selectedUseful + selectedConditional) / totalSelected)
+        : null,
+      strongUsefulSuggestionSelectionRate: availableUseful ? round(selectedUseful / availableUseful) : null,
+      conditionalSuggestionSelectionRate: availableConditional
+        ? round(selectedConditional / availableConditional)
+        : null,
+      misalignedSuggestionRejectionRate: availableMisaligned
+        ? round((availableMisaligned - selectedMisaligned) / availableMisaligned)
+        : null,
+      conditionalSuggestionScoringStatus: "有条件建议不自动判为应采纳或应拒绝，需结合修订方式与理由评分",
+      scoringStatus: "初稿与修订稿待双评分；计算修订增益、原创性保留、条件权衡、有效采纳和理由质量"
+    });
+  }
+
+  function aiCreativeModule(moduleNumber) {
+    const timeline = [
+      moduleIntro(
+        moduleNumber,
+        "AI 协同创意优化",
+        "考察先独立生成方案、再选择性利用 AI 建议进行修订的能力。",
+        `<div class="rule-grid">
+          <div class="rule-item"><h3>阶段 1：独立方案</h3><p>先独立写出一个完整方案，包括怎么做、为什么可能有效。此时看不到 AI 建议。</p></div>
+          <div class="rule-item"><h3>阶段 2：阅读建议</h3><p>系统会显示几条预先生成的 AI 建议，其中可能有直接有用的、有条件才适用的，也有偏离任务目标的。</p></div>
+          <div class="rule-item"><h3>选择性修订</h3><p>可以采纳、改写或拒绝任何建议，也可以保留自己的原创想法。请提交修订后的完整方案。</p></div>
+          <div class="rule-item"><h3>解释你的选择</h3><p>说明保留、采纳或拒绝了什么，以及原因。正式任务每个阶段采用固定倒计时。</p></div>
+        </div>
+        <div class="example-box"><strong>评分重点：</strong>不是简单区分“好建议/坏建议”，而是能否识别适用条件、权衡副作用并真正改进方案。</div>`
+      ),
+      aiCreativeTrial(CREATIVE_PRACTICE, "practice"),
+      simpleMessage(
+        "练习结束",
+        "<p>正式任务共两题。评分会比较独立方案与修订方案，不是改得越多越好；关键是修订是否有效并保留独立判断。</p>",
+        "开始正式任务"
+      )
+    ];
+    CREATIVE_ITEMS.forEach(item => timeline.push(aiCreativeTrial(item, "formal")));
+    timeline.push(moduleComplete("AI 协同创意优化", writeAICreativeSummary));
+    return timeline;
+  }
+
+  const JOL_PRACTICE_ITEMS = Object.freeze([
+    {
+      id: "JOL_P_NOAI",
+      condition: "no_ai",
+      question: "5，8，11，14，下一项是？",
+      options: ["15", "16", "17", "18"],
+      correctIndex: 2,
+      aiText: null,
+      aiChoiceIndex: null
+    },
+    {
+      id: "JOL_P_AI",
+      condition: "ai",
+      question: "3 本同样的练习册共 24 元，每本多少钱？",
+      options: ["6 元", "8 元", "9 元", "12 元"],
+      correctIndex: 1,
+      aiText: "AI 建议：24 ÷ 3 = 6，所以选 6 元。",
+      aiChoiceIndex: 0
+    }
+  ]);
+
+  const JOL_NO_AI_ITEMS = Object.freeze([
+    {
+      id: "JOL_N1",
+      question: "某商品原价 150 元，先提价 20%，再优惠 30 元。现价是多少元？",
+      options: ["144 元", "150 元", "156 元", "180 元"],
+      correctIndex: 1,
+      aiText: "AI 建议：先减去 30 元得 120 元，再增加 20%，现价是 144 元。",
+      aiChoiceIndex: 0
+    },
+    {
+      id: "JOL_N2",
+      question: "3 台速度相同的打印机 4 分钟共打印 240 张。按相同速度，5 台打印机 6 分钟打印多少张？",
+      options: ["480 张", "600 张", "720 张", "900 张"],
+      correctIndex: 1,
+      aiText: "AI 建议：每台每分钟打印 240÷3÷4＝20 张，5 台工作 6 分钟可打印 20×5×6＝600 张。",
+      aiChoiceIndex: 1
+    },
+    {
+      id: "JOL_N3",
+      question: "5 个数的平均数是 15，再加入一个数 21。新的平均数是多少？",
+      options: ["15", "16", "17", "18"],
+      correctIndex: 1,
+      aiText: "AI 建议：原来总和是 15×5＝75，加入 21 后总和为 96；96÷6＝16。",
+      aiChoiceIndex: 1
+    },
+    {
+      id: "JOL_N4",
+      question: "研究肥料是否促进植物生长时，实验组既增加肥料又增加浇水量，最后长得更高。能得出什么结论？",
+      options: ["能确定是肥料造成的", "不能确定，因为肥料和浇水量同时改变", "能确定是浇水造成的", "能确定肥料没有作用"],
+      correctIndex: 1,
+      aiText: "AI 建议：实验组长得更高，说明肥料促进了生长，因此可以确定是肥料造成的。",
+      aiChoiceIndex: 0
+    },
+    {
+      id: "JOL_N5",
+      question: "如果下雨，操场会湿。现在操场是湿的，能否据此确定刚才下雨了？",
+      options: ["能，因为结果已经出现", "不能，也可能是洒水等其他原因", "能，只要操场全部湿", "不能，因为下雨不会让操场湿"],
+      correctIndex: 1,
+      aiText: "AI 建议：不能确定刚才下雨了，因为洒水等其他原因也可能让操场变湿。",
+      aiChoiceIndex: 1
+    },
+    {
+      id: "JOL_N6",
+      question: "数列 2、5、11、23 的下一项是多少？",
+      options: ["35", "46", "47", "48"],
+      correctIndex: 2,
+      aiText: "AI 建议：相邻差是 3、6、12，下一次继续加 12，得到 35。",
+      aiChoiceIndex: 0
+    }
+  ]);
+
+  const JOL_AI_ITEMS = Object.freeze([
+    {
+      id: "JOL_A1",
+      condition: "ai",
+      question: "某社团原有 40 人，人数先增加 20%，后来有 5 人退出。现在有多少人？",
+      options: ["41 人", "43 人", "45 人", "48 人"],
+      correctIndex: 1,
+      aiText: "AI 建议：40×1.2＝48，再减去 5，得到 43 人。",
+      aiChoiceIndex: 1
+    },
+    {
+      id: "JOL_A2",
+      condition: "ai",
+      question: "骑行前 12 千米的速度是 18 千米/时，后 12 千米的速度是 12 千米/时。全程平均速度是多少？",
+      options: ["14.4 千米/时", "15 千米/时", "16 千米/时", "18 千米/时"],
+      correctIndex: 0,
+      aiText: "AI 建议：两段距离相同，平均速度就是两个速度的平均数，即 15 千米/时。",
+      aiChoiceIndex: 1
+    },
+    {
+      id: "JOL_A3",
+      condition: "ai",
+      question: "甲班 30 人，平均分 72；乙班 20 人，平均分 78。两个班合在一起的平均分是多少？",
+      options: ["74.4", "75", "76", "77"],
+      correctIndex: 0,
+      aiText: "AI 建议：把两个班的平均分再平均，(72＋78)÷2＝75。",
+      aiChoiceIndex: 1
+    },
+    {
+      id: "JOL_A4",
+      condition: "ai",
+      question: "研究不同颜色的光是否影响种子发芽，哪种设计更合理？",
+      options: ["两组只改变光的颜色，种子数量、水量、温度和观察时间尽量相同", "两组同时改变光、水量和温度", "每种光只观察一粒种子", "只询问同学认为哪种光更好"],
+      correctIndex: 0,
+      aiText: "AI 建议：只改变光的颜色，其他条件尽量一致，并使用足够数量的种子进行比较。",
+      aiChoiceIndex: 0
+    },
+    {
+      id: "JOL_A5",
+      condition: "ai",
+      question: "所有参加校队的学生都完成了体检。小林已经完成体检。能否推出小林参加了校队？",
+      options: ["能，因为完成体检就是参加校队", "不能，完成体检的人不一定参加校队", "能，只要体检合格", "不能，因为校队学生不需要体检"],
+      correctIndex: 1,
+      aiText: "AI 建议：校队学生都完成体检，小林也完成了体检，因此小林参加了校队。",
+      aiChoiceIndex: 0
+    },
+    {
+      id: "JOL_A6",
+      condition: "ai",
+      question: "小林 14:35 出发，步行 18 分钟到车站，等车 7 分钟，乘车 26 分钟。几点到达？",
+      options: ["15:16", "15:26", "15:31", "15:36"],
+      correctIndex: 1,
+      aiText: "AI 建议：18＋7＋26＝51 分钟，14:35 加 51 分钟是 15:26。",
+      aiChoiceIndex: 1
+    }
+  ]);
+
+  function makeJOLItem(item, condition, matchedPairId, itemForm) {
+    return {
+      ...item,
+      condition,
+      matchedPairId,
+      itemForm,
+      aiText: condition === "ai" ? item.aiText : null,
+      aiChoiceIndex: condition === "ai" ? item.aiChoiceIndex : null
+    };
+  }
+
+  function buildJOLFormalTrials(group) {
+    const pairCount = Math.min(
+      CONFIG.jolItemsPerCondition,
+      JOL_NO_AI_ITEMS.length,
+      JOL_AI_ITEMS.length
+    );
+    const selectedPairIndices = shuffle(
+      Array.from({ length: JOL_NO_AI_ITEMS.length }, (_, index) => index)
+    ).slice(0, pairCount);
+    const sequence = [];
+
+    selectedPairIndices.forEach(index => {
+      const matchedPairId = "JOL_PAIR_" + (index + 1);
+      if (group === "A") {
+        sequence.push(makeJOLItem(JOL_NO_AI_ITEMS[index], "no_ai", matchedPairId, "N"));
+        sequence.push(makeJOLItem(JOL_AI_ITEMS[index], "ai", matchedPairId, "A"));
+      } else {
+        sequence.push(makeJOLItem(JOL_NO_AI_ITEMS[index], "ai", matchedPairId, "N"));
+        sequence.push(makeJOLItem(JOL_AI_ITEMS[index], "no_ai", matchedPairId, "A"));
+      }
+    });
+
+    return sequence.map((item, index) => {
+      const desiredCorrectPosition = index % item.options.length;
+      const balancedItem = rotateChoiceItem(item, desiredCorrectPosition - item.correctIndex);
+      return jolTrial(balancedItem, "formal");
+    });
+  }
+
+  function jolTrial(item, phase) {
+    const duration = phase === "practice" ? Math.min(25000, CONFIG.jolItemMs) : CONFIG.jolItemMs;
+    const aiBox = item.condition === "ai"
+      ? `
+        <div class="ai-box">
+          <div class="strong">预先生成的 AI 建议（可能正确，也可能错误）：</div>
+          <p>${escapeHTML(item.aiText)}</p>
+        </div>
+      `
+      : '<div class="info-box"><strong>本题无 AI 建议，请独立判断。</strong></div>';
+    return {
+      type: jsPsychHtmlKeyboardResponse,
+      choices: "NO_KEYS",
+      stimulus: `
+        <section class="gait-card">
+          <div class="trial-head">
+            <div><div class="module-pill">${item.condition === "ai" ? "有 AI 条件" : "无 AI 条件"}</div><h2 style="margin:0;">作答与信心判断</h2></div>
+            <span id="jol-timer" class="timer"></span>
+          </div>
+          <div class="material-box"><strong>问题：</strong>${escapeHTML(item.question)}</div>
+          ${aiBox}
+          ${optionRows("jol-choice", item.options)}
+          <div class="confidence-wrap">
+            <label class="field-label">你认为自己的答案正确的可能性是：<strong id="jol-confidence-value">50</strong>%</label>
+            <input id="jol-confidence" type="range" min="0" max="100" step="5" value="50">
+            <div class="range-labels"><span>0 一定错误</span><span>50 不确定</span><span>100 一定正确</span></div>
+          </div>
+          <div id="jol-error" class="error-text"></div>
+          <button id="jol-submit" class="gait-btn" type="button">提交</button>
+        </section>
+      `,
+      data: baseData("JOL", phase, {
+        itemId: item.id,
+        matchedPairId: item.matchedPairId || null,
+        itemForm: item.itemForm || null,
+        condition: item.condition,
+        questionText: item.question,
+        optionsJson: JSON.stringify(item.options),
+        optionOrderOriginalIndicesJson: JSON.stringify(item.optionOrderOriginalIndices || [0, 1, 2, 3]),
+        correctIndex: item.correctIndex,
+        aiSuggestionText: item.aiText,
+        aiChoiceIndex: item.aiChoiceIndex,
+        aiSuggestionCorrect: item.condition === "ai" ? item.aiChoiceIndex === item.correctIndex : null,
+        timeLimitMs: duration
+      }),
+      on_load: function() {
+        const started = performance.now();
+        const deadline = started + duration;
+        const confidence = document.getElementById("jol-confidence");
+        const timer = document.getElementById("jol-timer");
+        let finished = false;
+        let interval = null;
+        confidence.addEventListener("input", () => { document.getElementById("jol-confidence-value").textContent = confidence.value; });
+
+        function finish(timedOut) {
+          if (finished) return;
+          const selected = document.querySelector('input[name="jol-choice"]:checked');
+          if (!timedOut && !selected) {
+            document.getElementById("jol-error").textContent = "请先选择一个答案。";
+            return;
+          }
+          finished = true;
+          if (interval) clearInterval(interval);
+          const responseIndex = selected ? Number(selected.value) : null;
+          jsPsych.finishTrial({
+            responseIndex,
+            responseLabel: responseIndex === null ? null : item.options[responseIndex],
+            correct: responseIndex === null ? null : responseIndex === item.correctIndex,
+            confidence: Number(confidence.value),
+            absoluteCalibrationError: responseIndex === null
+              ? null
+              : round(Math.abs(Number(confidence.value) / 100 - (responseIndex === item.correctIndex ? 1 : 0))),
+            followedAISuggestion: item.condition === "ai" && responseIndex !== null
+              ? responseIndex === item.aiChoiceIndex : null,
+            rt: round(performance.now() - started, 1),
+            timedOut
+          });
+        }
+
+        document.getElementById("jol-submit").addEventListener("click", () => finish(false));
+        const update = function() {
+          const remaining = deadline - performance.now();
+          timer.textContent = formatTime(remaining);
+          timer.classList.toggle("urgent", remaining <= 7000);
+          if (remaining <= 0) finish(true);
+        };
+        update();
+        interval = setInterval(update, 150);
+      }
+    };
+  }
+
+  function gammaCorrelation(rows) {
+    const valid = rows.filter(row => Number.isFinite(row.confidence) && typeof row.correct === "boolean");
+    let concordant = 0;
+    let discordant = 0;
+    for (let i = 0; i < valid.length; i++) {
+      for (let j = i + 1; j < valid.length; j++) {
+        const confidenceDifference = valid[i].confidence - valid[j].confidence;
+        const correctnessDifference = Number(valid[i].correct) - Number(valid[j].correct);
+        const product = confidenceDifference * correctnessDifference;
+        if (product > 0) concordant += 1;
+        else if (product < 0) discordant += 1;
+      }
+    }
+    return concordant + discordant > 0 ? (concordant - discordant) / (concordant + discordant) : null;
+  }
+
+  function jolConditionMetrics(rows) {
+    const completed = rows.filter(row => typeof row.correct === "boolean");
+    return {
+      trials: rows.length,
+      completed: completed.length,
+      completionRate: rows.length ? round(completed.length / rows.length) : null,
+      accuracy: completed.length ? round(completed.filter(row => row.correct).length / completed.length) : null,
+      meanConfidence: round(mean(completed.map(row => row.confidence)), 1),
+      meanRT: round(mean(completed.map(row => row.rt)), 1),
+      meanAbsoluteCalibrationError: round(mean(completed.map(row => row.absoluteCalibrationError))),
+      gamma: round(gammaCorrelation(completed))
+    };
+  }
+
+  function writeJOLSummary() {
+    const rows = jsPsych.data.get().filterCustom(row => row.taskName === "JOL" && row.phase === "formal").values();
+    const noAI = jolConditionMetrics(rows.filter(row => row.condition === "no_ai"));
+    const ai = jolConditionMetrics(rows.filter(row => row.condition === "ai"));
+    writeSummary("JOL", {
+      formalItemCount: rows.length,
+      counterbalanceGroup: state.orderGroup,
+      matchedCrossoverDesign: true,
+      noAIJson: JSON.stringify(noAI),
+      aiJson: JSON.stringify(ai),
+      gammaNoAI: noAI.gamma,
+      gammaAI: ai.gamma,
+      deltaGamma: Number.isFinite(ai.gamma) && Number.isFinite(noAI.gamma) ? round(ai.gamma - noAI.gamma) : null,
+      confidenceInflationAIminusNoAI: Number.isFinite(ai.meanConfidence) && Number.isFinite(noAI.meanConfidence)
+        ? round(ai.meanConfidence - noAI.meanConfidence, 1) : null,
+      accuracyChangeAIminusNoAI: Number.isFinite(ai.accuracy) && Number.isFinite(noAI.accuracy)
+        ? round(ai.accuracy - noAI.accuracy) : null,
+      responseTimeChangeAIminusNoAI: Number.isFinite(ai.meanRT) && Number.isFinite(noAI.meanRT)
+        ? round(ai.meanRT - noAI.meanRT, 1) : null,
+      calibrationErrorChangeAIminusNoAI:
+        Number.isFinite(ai.meanAbsoluteCalibrationError) && Number.isFinite(noAI.meanAbsoluteCalibrationError)
+          ? round(ai.meanAbsoluteCalibrationError - noAI.meanAbsoluteCalibrationError) : null,
+      gammaInterpretationStatus: "探索性指标：每个条件仅6题，个体层面的Gamma需结合更多题目和预测试稳定性解释"
+    });
+  }
+
+  function jolModule(moduleNumber) {
+    const timeline = [
+      moduleIntro(
+        moduleNumber,
+        "元认知信心校准",
+        "比较有无 AI 建议时，信心判断与实际正确性是否一致。",
+        `<div class="rule-grid">
+          <div class="rule-item"><h3>先完成选择题</h3><p>阅读问题和四个选项，选择你认为最正确的答案。</p></div>
+          <div class="rule-item"><h3>再评价信心</h3><p>拖动滑块，回答“我这次答案正确的可能性是多少”。0% 表示几乎肯定错，100% 表示几乎肯定对。</p></div>
+          <div class="rule-item"><h3>有 AI 与无 AI</h3><p>部分题目会显示固定 AI 建议，部分题目没有。AI 建议可能正确，也可能错误。</p></div>
+          <div class="rule-item"><h3>如实评分</h3><p>信心没有“越高越好”。不确定时可以选 40%-60%；很有把握时再选择较高或较低数值。</p></div>
+        </div>
+        <div class="example-box"><strong>例子：</strong>如果你觉得答案大约有七成可能正确，就把信心调到 70%。</div>`
+      )
+    ];
+    JOL_PRACTICE_ITEMS.forEach(item => {
+      timeline.push(jolTrial(item, "practice"));
+      timeline.push(practiceFeedback("JOL", row => `
+        <div class="${row.correct ? "success-text" : "error-text"}">${row.correct ? "答案正确" : "答案不正确"}</div>
+        <p>正确答案：<strong>${escapeHTML(item.options[item.correctIndex])}</strong></p>
+        ${item.condition === "ai"
+          ? `<p>本练习题中的 AI 建议是<strong>${item.aiChoiceIndex === item.correctIndex ? "正确的" : "错误的"}</strong>，请记住正式题中的 AI 也不一定可靠。</p>`
+          : ""}
+        <p>练习时请同时熟悉 0%-100% 的信心评分。</p>
+      `, 1200));
+    });
+    timeline.push(simpleMessage(
+      "正式任务",
+      "<p>正式题不再反馈对错。AI 建议有时可靠、有时不可靠，请保持自己的判断。</p>",
+      "开始正式任务"
+    ));
+
+    timeline.push({
+      timeline: buildJOLFormalTrials("A"),
+      conditional_function: () => state.orderGroup === "A"
+    });
+    timeline.push({
+      timeline: buildJOLFormalTrials("B"),
+      conditional_function: () => state.orderGroup === "B"
+    });
+    timeline.push(moduleComplete("元认知信心校准", writeJOLSummary));
+    return timeline;
+  }
+
+  function writeSessionSummary() {
+    if (state.summaryWritten) return;
+    state.summaryWritten = true;
+    const rows = jsPsych.data.get().values();
+    const requiredTasks = ["AUT", "RAT", "PROBLEM_FINDING", "STOP_SIGNAL", "NBACK", "TASK_SWITCH", "AI_ADVICE", "AI_CREATIVE", "JOL"];
+    const completedTasks = requiredTasks.filter(task =>
+      rows.some(row => row.taskName === task && row.phase === "formal")
+    );
+    const fatigueRows = rows.filter(row => row.taskName === "FATIGUE" && row.phase === "formal");
+    const firstFatigue = fatigueRows.length ? fatigueRows[0].fatigueRating : null;
+    const lastFatigue = fatigueRows.length ? fatigueRows[fatigueRows.length - 1].fatigueRating : null;
+    const qualityFlags = [];
+    if (completedTasks.length < requiredTasks.length) qualityFlags.push("missing_core_module");
+    if (state.visibilityHiddenCount > 0) qualityFlags.push("page_hidden_during_test");
+    if (Number(lastFatigue) >= 8) qualityFlags.push("high_final_fatigue");
+
+    const stopSummary = rows.find(row => row.taskName === "STOP_SIGNAL_SUMMARY");
+    if (stopSummary && Number(stopSummary.goOmissionRate) > 0.20) qualityFlags.push("high_go_omission");
+    if (stopSummary && stopSummary.ssrtValid === false) qualityFlags.push("invalid_ssrt");
+
+    const nbackSummary = rows.find(row => row.taskName === "NBACK_SUMMARY");
+    if (nbackSummary && (
+      Number(nbackSummary.oneBackOmissionRate) > 0.10 ||
+      Number(nbackSummary.twoBackOmissionRate) > 0.10
+    )) qualityFlags.push("high_nback_omission");
+
+    writeSummary("GAIT", {
+      completedTaskCount: completedTasks.length,
+      expectedTaskCount: requiredTasks.length,
+      completionRate: round(completedTasks.length / requiredTasks.length),
+      completedTasksJson: JSON.stringify(completedTasks),
+      missingTasksJson: JSON.stringify(requiredTasks.filter(task => !completedTasks.includes(task))),
+      visibilityHiddenCount: state.visibilityHiddenCount,
+      visibilityLogJson: JSON.stringify(state.visibilityLog),
+      initialFatigue: firstFatigue,
+      finalFatigue: lastFatigue,
+      fatigueChange: Number.isFinite(Number(firstFatigue)) && Number.isFinite(Number(lastFatigue))
+        ? Number(lastFatigue) - Number(firstFatigue) : null,
+      sessionDurationMinutes: round((performance.now() - state.startedPerformance) / 60000, 2),
+      qualityFlagsJson: JSON.stringify(qualityFlags),
+      compositeScoreStatus: "未计算：开放题需双评分，且须经预测试标准化、信效度检验和年龄常模后才能合成"
+    });
+  }
+
+  function closingTrial() {
+    return {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <section class="gait-card compact center">
+          <div class="status-pill">全部任务已完成</div>
+          <h2 style="margin-top:16px;">感谢你的认真参与</h2>
+          <p>AI 建议并不总是正确，重要的是核查证据、保留判断，并在有帮助时选择性使用。</p>
+          <div class="warning-box">
+            本程序不会当场给出“拔尖/不拔尖”结论。开放题需双评分，综合指数需在预测试、信效度检验和同年龄常模建立后才能解释。
+          </div>
+          <p class="muted small">点击下方按钮结束实验，随后由主试下载正式数据 CSV。</p>
+        </section>
+      `,
+      choices: ["结束并进入数据下载页"],
+      on_start: function(trial) {
+        state.pendingSummary = null;
+        writeSessionSummary();
+        if (state.pendingSummary) trial.data = { ...trial.data, ...state.pendingSummary };
+      },
+      data: baseData("CLOSING", "instruction", { includeInPrimary: false })
+    };
+  }
+
+  function safeFilenamePart(value) {
+    return String(value || "unknown").replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 30);
+  }
+
+  function downloadBlob(content, mimeType, filename) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function renderDownloadPage() {
+    persistCheckpoint();
+    state.finished = true;
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+    const root = document.getElementById("jspsych-target");
+    const backupMessage = state.checkpointAvailable
+      ? "若误刷新，同一标签页可在启动页导出备份 JSON，但实验不能从中断处接续。"
+      : "当前浏览器未能建立标签页备份，请勿刷新或关闭页面。";
+    root.innerHTML = `
+      <section class="gait-card">
+        <div class="status-pill">数据已保留在本页面内存中</div>
+        <h2 style="margin-top:16px;">请由主试下载并核对文件</h2>
+        <p>被试编号：<strong>${escapeHTML(state.participantId)}</strong>　·　顺序组：<strong>${escapeHTML(state.orderGroup)}</strong>　·　运行模式：<strong>${escapeHTML(CONFIG.runMode)}</strong></p>
+        <div class="warning-box">
+          请在关闭标签页前至少下载“正式数据 CSV”，并确认文件已保存。${backupMessage}
+        </div>
+        <div class="download-grid">
+          <div class="download-card">
+            <h3>正式数据 CSV</h3>
+            <p class="muted small">包含基本信息、正式试次、疲劳记录、模块汇总和会话汇总；不含练习与指导语。</p>
+            <button id="download-csv" class="gait-btn" type="button">下载正式数据 CSV</button>
+          </div>
+          <div class="download-card">
+            <h3>完整过程 JSON</h3>
+            <p class="muted small">含练习、正式任务和系统事件，适合程序排错与过程复核；不用于直接计分。</p>
+            <button id="download-json" class="gait-btn secondary" type="button">下载完整 JSON</button>
+          </div>
+        </div>
+        <div id="download-status" class="success-text" style="margin-top:18px;"></div>
+        <p class="muted small">数据仅包含匿名编号和计划书规定的最小化字段。请按伦理审批方案加密保存并限制访问。</p>
+      </section>
+    `;
+
+    const date = new Date().toISOString().slice(0, 10).replaceAll("-", "");
+    const base = "GAIT-Junior_" + safeFilenamePart(state.participantId) + "_" + CONFIG.runMode + "_" + date;
+    const status = document.getElementById("download-status");
+    document.getElementById("download-csv").addEventListener("click", function() {
+      const formal = jsPsych.data.get().filterCustom(row => row.includeInPrimary === true);
+      downloadBlob("\ufeff" + formal.csv(), "text/csv;charset=utf-8", base + ".csv");
+      clearCheckpoint();
+      status.textContent = "正式数据 CSV 已触发下载，请检查浏览器下载文件夹。";
+    });
+    document.getElementById("download-json").addEventListener("click", function() {
+      downloadBlob(JSON.stringify(jsPsych.data.get().values(), null, 2), "application/json;charset=utf-8", base + "_完整过程.json");
+      clearCheckpoint();
+      status.textContent = "完整过程 JSON 已触发下载，请检查浏览器下载文件夹。";
+    });
+  }
+
+  const timeline = [
+    consentTrial(),
+    deviceGateTrial(),
+    demographicsTrial(),
+    readinessTrial(),
+    experimentOverviewTrial(),
+    fatigueTrial("baseline", false)
+  ];
+
+  timeline.push(
+    ...autModule(1),
+    ...ratModule(2),
+    ...problemFindingModule(3),
+    fatigueTrial("break_1_after_module_3", true),
+    ...stopSignalModule(4),
+    ...nBackModule(5),
+    ...taskSwitchModule(6),
+    fatigueTrial("break_2_after_module_6", true),
+    ...aiAdviceModule(7),
+    ...aiCreativeModule(8),
+    ...jolModule(9),
+    fatigueTrial("post_test", false),
+    closingTrial()
+  );
+
+  jsPsych.run(timeline);
+
+  </script>
+</body>
+</html>
